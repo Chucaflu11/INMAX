@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: atproto
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pds:
+    build:
+      context: ./backend/atproto
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/atproto
+      ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+
+  api:
+    build:
+      context: ./backend/api
+      dockerfile: Dockerfile
+    depends_on:
+      - pds
+    environment:
+      ATPROTO_PDS_URL: http://pds:3000
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
