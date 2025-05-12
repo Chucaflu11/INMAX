@@ -12,7 +12,7 @@ services:
 
   pds:
     build:
-      context: ./backend/atproto
+      context: ./ATProto
       dockerfile: Dockerfile
     depends_on:
       - postgres
@@ -24,7 +24,7 @@ services:
 
   api:
     build:
-      context: ./backend/api
+      context: ./api
       dockerfile: Dockerfile
     depends_on:
       - pds

@@ -1,4 +1,4 @@
-const { createServer } = require('@atproto/pds');
+import { createServer } from '@atproto/pds';
 
 const main = async () => {
   const server = await createServer({

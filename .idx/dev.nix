@@ -10,7 +10,7 @@
 
     pkgs.docker-compose
     
-    (pkgs.python311.withPackages (ps: with ps; [
+    (pkgs.python311.withPackages (ps:   [
       ps.fastapi
       ps.uvicorn
       ps.httpx
