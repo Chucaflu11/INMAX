@@ -9,11 +9,14 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "type": "module",
   "dependencies": {
-    "@atproto/api": "^0.15.6",
-    "@atproto/identity": "^0.4.8",
-    "@atproto/lexicon": "^0.4.11",
-    "@atproto/repo": "^0.8.1",
-    "@atproto/pds": "^0.4"
+    "@atproto/api": "latest",
+    "@atproto/identity": "latest",
+    "@atproto/lexicon": "latest",
+    "@atproto/pds": "latest",
+    "@atproto/repo": "latest",
+    "dotenv": "^16.5.0",
+    "pg": "^8.11.3"
   }
 }

@@ -11,6 +11,8 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+*.env
+.env
 
 # IntelliJ related
 *.iml
@@ -10032,6 +10034,7 @@ ATProto/node_modules/get-intrinsic/package.json
 ATProto/node_modules/get-intrinsic/README.md
 ATProto/node_modules/get-intrinsic/.github/FUNDING.yml
 ATProto/node_modules/get-intrinsic/test/GetIntrinsic.js
+ATProto/node_modules/get-proto
 ATProto/node_modules/get-proto/.eslintrc
 ATProto/node_modules/get-proto/.nycrc
 ATProto/node_modules/get-proto/CHANGELOG.md
@@ -10039,3 +10042,8 @@ ATProto/node_modules/get-proto/LICENSE
 ATProto/node_modules/get-proto/Object.getPrototypeOf.d.ts
 ATProto/node_modules/get-proto/Object.getPrototypeOf.js
 ATProto/node_modules/get-proto/.github/FUNDING.yml
+ATProto/node_modules/github-from-package
+ATProto/node_modules/glob
+
+concatenate_files.py
+concatenated_code.txt
