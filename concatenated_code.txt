@@ -1,0 +1,1287 @@
+
+# ./docker-compose.yml
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: atproto
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pds:
+    build:
+      context: ./ATProto
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/atproto
+      ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    depends_on:
+      - pds
+    environment:
+      ATPROTO_PDS_URL: http://pds:3000
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
+
+# ./lib/main.dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
+import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
+import 'services/api_services.dart';
+import 'services/storage_service.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create:
+              (_) => AuthProvider(
+                apiService: ApiService(),
+                storageService: StorageService(),
+              ),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'INMAX',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+          scaffoldBackgroundColor: Colors.grey[50],
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.blue,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            filled: true,
+            fillColor: Colors.white,
+          ),
+        ),
+        home: const AuthWrapper(),
+      ),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        if (authProvider.isLoading) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        return authProvider.isAuthenticated
+            ? const HomeScreen()
+            : const LoginScreen();
+      },
+    );
+  }
+}
+
+
+# ./lib/config/api_config.dart
+class ApiConfig {
+  static const String baseUrl = 'http://localhost:8000';
+  static const String apiKey = '';
+  static const Map<String, String> headers = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+  };
+}
+
+
+# ./lib/screens/profile_screen.dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        final user = authProvider.currentUser;
+
+        if (user == null) {
+          return const Scaffold(
+            body: Center(child: Text('Usuario no autenticado')),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(title: const Text('Mi Perfil')),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                // Avatar
+                CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.grey.shade300,
+                  child:
+                      user.avatar != null
+                          ? null // Aquí se cargaría la imagen si existiera
+                          : Text(
+                            user.handle.isNotEmpty
+                                ? user.handle[0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(fontSize: 40),
+                          ),
+                ),
+                const SizedBox(height: 24),
+                // Nombre de usuario
+                Text(
+                  user.handle,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                if (user.displayName != null &&
+                    user.displayName!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    user.displayName!,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ],
+                const SizedBox(height: 16),
+                // Email
+                Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListTile(
+                    leading: const Icon(Icons.email),
+                    title: const Text('Email'),
+                    subtitle: Text(user.email),
+                  ),
+                ),
+                // DID
+                Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListTile(
+                    leading: const Icon(Icons.fingerprint),
+                    title: const Text('DID'),
+                    subtitle: Text(user.did),
+                    isThreeLine: true,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Botón de editar perfil (aún no implementado)
+                ElevatedButton.icon(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Edición de perfil no implementada'),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Editar Perfil'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+# ./lib/screens/login_screen.dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import 'home_screen.dart';
+import 'register_screen.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  LoginScreenState createState() => LoginScreenState();
+}
+
+class LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _identifierController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _identifierController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future _login() async {
+    if (_formKey.currentState!.validate()) {
+      final authProvider = Provider.of(context, listen: false);
+
+      final success = await authProvider.login(
+        _identifierController.text.trim(),
+        _passwordController.text,
+      );
+
+      if (success && mounted) {
+        // Navegar a la pantalla principal
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Iniciar Sesión')),
+      body: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
+          return Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const FlutterLogo(size: 80),
+                    const SizedBox(height: 32),
+                    TextFormField(
+                      controller: _identifierController,
+                      decoration: const InputDecoration(
+                        labelText: 'Usuario o Email',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor ingresa tu usuario o email';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'Contraseña',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                      obscureText: _obscurePassword,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor ingresa tu contraseña';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: authProvider.isLoading ? null : _login,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child:
+                          authProvider.isLoading
+                              ? const CircularProgressIndicator()
+                              : const Text('INICIAR SESIÓN'),
+                    ),
+                    if (authProvider.errorMessage != null) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        authProvider.errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const RegisterScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text('¿No tienes una cuenta? Regístrate'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+# ./lib/screens/home_screen.dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import 'login_screen.dart';
+import 'profile_screen.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        final user = authProvider.currentUser;
+
+        if (user == null) {
+          // Si el usuario no está autenticado, redirigir al login
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+            );
+          });
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Mi Red Social'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.account_circle),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.exit_to_app),
+                onPressed: () async {
+                  await authProvider.logout();
+                  // Navegar a la pantalla de login después de cerrar sesión
+                  if (context.mounted) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '¡Bienvenido, ${user.handle}!',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Tu identificador DID: ${user.did}',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 40),
+                const Text(
+                  'Aquí se mostrará el feed de tu red social',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              // Implementar acción de crear nuevo post
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Función de crear post no implementada'),
+                ),
+              );
+            },
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+# ./lib/screens/register_screen.dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import 'home_screen.dart';
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  RegisterScreenState createState() => RegisterScreenState();
+}
+
+class RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _handleController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _handleController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future _register() async {
+    if (_formKey.currentState!.validate()) {
+      final authProvider = Provider.of(context, listen: false);
+
+      final success = await authProvider.register(
+        _emailController.text.trim(),
+        _handleController.text.trim(),
+        _passwordController.text,
+      );
+
+      if (success && mounted) {
+        // Navegar a la pantalla principal
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Crear Cuenta')),
+      body: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
+          return Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const FlutterLogo(size: 80),
+                    const SizedBox(height: 32),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.email),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor ingresa tu email';
+                        }
+                        if (!value.contains('@') || !value.contains('.')) {
+                          return 'Por favor ingresa un email válido';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _handleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nombre de usuario',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor ingresa un nombre de usuario';
+                        }
+                        if (value.length < 3) {
+                          return 'El nombre de usuario debe tener al menos 3 caracteres';
+                        }
+                        // Validar que no tenga espacios ni caracteres especiales
+                        if (value.contains(' ') ||
+                            !RegExp(r'^[a-zA-Z0-9_.]+$').hasMatch(value)) {
+                          return 'El nombre de usuario solo puede contener letras, números, puntos y guiones bajos';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'Contraseña',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                      obscureText: _obscurePassword,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor ingresa una contraseña';
+                        }
+                        if (value.length < 8) {
+                          return 'La contraseña debe tener al menos 8 caracteres';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _confirmPasswordController,
+                      decoration: InputDecoration(
+                        labelText: 'Confirmar Contraseña',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
+                            });
+                          },
+                        ),
+                      ),
+                      obscureText: _obscureConfirmPassword,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor confirma tu contraseña';
+                        }
+                        if (value != _passwordController.text) {
+                          return 'Las contraseñas no coinciden';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: authProvider.isLoading ? null : _register,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child:
+                          authProvider.isLoading
+                              ? const CircularProgressIndicator()
+                              : const Text('REGISTRARSE'),
+                    ),
+                    if (authProvider.errorMessage != null) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        authProvider.errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('¿Ya tienes una cuenta? Inicia Sesión'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+# ./lib/providers/auth_provider.dart
+import 'package:flutter/material.dart';
+import '../models/auth_model.dart';
+import '../models/user_model.dart';
+import '../services/api_services.dart';
+import '../services/storage_service.dart';
+
+class AuthProvider extends ChangeNotifier {
+  final ApiService _apiService;
+  final StorageService _storageService;
+
+  User? _currentUser;
+  String? _accessToken;
+  String? _refreshToken;
+
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  AuthProvider({ApiService? apiService, StorageService? storageService})
+    : _apiService = apiService ?? ApiService(),
+      _storageService = storageService ?? StorageService() {
+    _initializeAuthState();
+  }
+
+  User? get currentUser => _currentUser;
+  bool get isAuthenticated => _currentUser != null && _accessToken != null;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+
+  // Inicializar el estado de autenticación desde el almacenamiento local
+  Future _initializeAuthState() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final hasSession = await _storageService.hasActiveSession();
+      if (hasSession) {
+        _currentUser = await _storageService.getUser();
+        _accessToken = await _storageService.getAccessToken();
+        _refreshToken = await _storageService.getRefreshToken();
+      }
+    } catch (e) {
+      _errorMessage = "Error al inicializar la sesión";
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Registrar un nuevo usuario
+  Future register(String email, String handle, String password) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final registerRequest = RegisterRequest(
+        email: email,
+        handle: handle,
+        password: password,
+      );
+
+      final response = await _apiService.register(registerRequest);
+
+      _accessToken = response.accessJwt;
+      _refreshToken = response.refreshJwt;
+      _currentUser = response.user;
+
+      await _storageService.saveAuthData(
+        response.accessJwt,
+        response.refreshJwt,
+        response.user,
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Iniciar sesión
+  Future login(String identifier, String password) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final loginRequest = LoginRequest(
+        identifier: identifier,
+        password: password,
+      );
+
+      final response = await _apiService.login(loginRequest);
+
+      _accessToken = response.accessJwt;
+      _refreshToken = response.refreshJwt;
+      _currentUser = response.user;
+
+      await _storageService.saveAuthData(
+        response.accessJwt,
+        response.refreshJwt,
+        response.user,
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Cerrar sesión
+  Future logout() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      if (_accessToken != null) {
+        await _apiService.logout(_accessToken!);
+      }
+    } catch (e) {
+      // Incluso si falla la llamada al API, limpiamos los datos locales
+    } finally {
+      await _storageService.clearAuthData();
+      _accessToken = null;
+      _refreshToken = null;
+      _currentUser = null;
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Refrescar token
+  Future refreshTokenIfNeeded() async {
+    if (_refreshToken == null) return false;
+
+    try {
+      final response = await _apiService.refreshToken(_refreshToken!);
+
+      _accessToken = response.accessJwt;
+      _refreshToken = response.refreshJwt;
+
+      await _storageService.updateTokens(
+        response.accessJwt,
+        response.refreshJwt,
+      );
+
+      return true;
+    } catch (e) {
+      // Si falla el refresco, forzamos logout
+      await logout();
+      return false;
+    }
+  }
+
+  // Obtener token de acceso con refresco automático si es necesario
+  Future getValidAccessToken() async {
+    if (_accessToken == null) return null;
+
+    // Aquí se podría implementar lógica para verificar si el token está por expirar
+    // y refrescarlo automáticamente si es necesario
+
+    return _accessToken;
+  }
+}
+
+
+# ./lib/models/user_model.dart
+class User {
+  final String did;
+  final String handle;
+  final String email;
+  final String? displayName;
+  final String? avatar;
+
+  User({
+    required this.did,
+    required this.handle,
+    required this.email,
+    this.displayName,
+    this.avatar,
+  });
+
+  factory User.fromJson(Map json) {
+    return User(
+      did: json['did'] ?? '',
+      handle: json['handle'] ?? '',
+      email: json['email'] ?? '',
+      displayName: json['displayName'],
+      avatar: json['avatar'],
+    );
+  }
+
+  Map toJson() {
+    return {
+      'did': did,
+      'handle': handle,
+      'email': email,
+      'displayName': displayName,
+      'avatar': avatar,
+    };
+  }
+}
+
+
+# ./lib/models/auth_model.dart
+import 'user_model.dart';
+
+class AuthResponse {
+  final String accessJwt;
+  final String refreshJwt;
+  final User user;
+
+  AuthResponse({
+    required this.accessJwt,
+    required this.refreshJwt,
+    required this.user,
+  });
+
+  factory AuthResponse.fromJson(Map json) {
+    return AuthResponse(
+      accessJwt: json['accessJwt'] ?? '',
+      refreshJwt: json['refreshJwt'] ?? '',
+      user: User.fromJson(json['user'] ?? {}),
+    );
+  }
+}
+
+class LoginRequest {
+  final String identifier;
+  final String password;
+
+  LoginRequest({required this.identifier, required this.password});
+
+  Map toJson() {
+    return {'identifier': identifier, 'password': password};
+  }
+}
+
+class RegisterRequest {
+  final String email;
+  final String handle;
+  final String password;
+  final String? inviteCode;
+
+  RegisterRequest({
+    required this.email,
+    required this.handle,
+    required this.password,
+    this.inviteCode,
+  });
+
+  Map toJson() {
+    return {
+      'email': email,
+      'handle': handle,
+      'password': password,
+      if (inviteCode != null) 'inviteCode': inviteCode,
+    };
+  }
+}
+
+
+# ./lib/widgets/custom_button.dart
+
+
+# ./lib/widgets/auth_form.dart
+
+
+# ./lib/services/storage_service.dart
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/user_model.dart';
+
+class StorageService {
+  static const String _accessTokenKey = 'access_token';
+  static const String _refreshTokenKey = 'refresh_token';
+  static const String _userKey = 'user';
+  static const String _tokenExpiryKey = 'token_expiry';
+
+  // Guardar tokens y datos de usuario
+  Future saveAuthData(
+    String accessToken,
+    String refreshToken,
+    User user,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accessTokenKey, accessToken);
+    await prefs.setString(_refreshTokenKey, refreshToken);
+    await prefs.setString(_userKey, jsonEncode(user.toJson()));
+
+    // Establecer tiempo de expiración del token (ejemplo: 2 horas)
+    final expiry =
+        DateTime.now().add(const Duration(hours: 2)).millisecondsSinceEpoch;
+    await prefs.setInt(_tokenExpiryKey, expiry);
+  }
+
+  // Obtener token de acceso
+  Future getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_accessTokenKey);
+  }
+
+  // Obtener token de refresco
+  Future getRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_refreshTokenKey);
+  }
+
+  // Obtener datos del usuario
+  Future getUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userJson = prefs.getString(_userKey);
+    if (userJson != null) {
+      return User.fromJson(jsonDecode(userJson));
+    }
+    return null;
+  }
+
+  // Verificar si hay una sesión activa
+  Future hasActiveSession() async {
+    final accessToken = await getAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
+      return false;
+    }
+
+    // Verificar si el token ha expirado
+    final isExpired = await isTokenExpired();
+    return !isExpired;
+  }
+
+  // Verificar si el token ha expirado
+  Future isTokenExpired() async {
+    final prefs = await SharedPreferences.getInstance();
+    final expiry = prefs.getInt(_tokenExpiryKey);
+    if (expiry == null) return true;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    return now > expiry;
+  }
+
+  // Eliminar datos de sesión
+  Future clearAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_accessTokenKey);
+    await prefs.remove(_refreshTokenKey);
+    await prefs.remove(_userKey);
+    await prefs.remove(_tokenExpiryKey);
+  }
+
+  // Actualizar tokens
+  Future updateTokens(String accessToken, String refreshToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accessTokenKey, accessToken);
+    await prefs.setString(_refreshTokenKey, refreshToken);
+
+    // Actualizar tiempo de expiración
+    final expiry =
+        DateTime.now().add(const Duration(hours: 2)).millisecondsSinceEpoch;
+    await prefs.setInt(_tokenExpiryKey, expiry);
+  }
+}
+
+
+# ./lib/services/api_services.dart
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
+import '../models/auth_model.dart';
+import '../models/user_model.dart';
+
+class ApiService {
+  final http.Client _client;
+
+  ApiService({http.Client? client}) : _client = client ?? http.Client();
+
+  // Función para registrar un nuevo usuario
+  Future register(RegisterRequest request) async {
+    try {
+      final response = await _client.post(
+        Uri.parse('${ApiConfig.baseUrl}/api/users/register'),
+        headers: ApiConfig.headers,
+        body: jsonEncode(request.toJson()),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return AuthResponse.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Error en el registro: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Falló la conexión al servidor: $e');
+    }
+  }
+
+  // Función para iniciar sesión
+  Future login(LoginRequest request) async {
+    try {
+      final response = await _client.post(
+        Uri.parse('${ApiConfig.baseUrl}/api/users/login'),
+        headers: ApiConfig.headers,
+        body: jsonEncode(request.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        return AuthResponse.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Error en el inicio de sesión: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Falló la conexión al servidor: $e');
+    }
+  }
+
+  // Función para obtener el perfil del usuario
+  Future getUserProfile(String did, String accessToken) async {
+    try {
+      final response = await _client.get(
+        Uri.parse('${ApiConfig.baseUrl}/api/users/profile/$did'),
+        headers: {...ApiConfig.headers, 'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode == 200) {
+        return User.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Error al obtener el perfil: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Falló la conexión al servidor: $e');
+    }
+  }
+
+  // Función para refrescar el token
+  Future refreshToken(String refreshToken) async {
+    try {
+      final response = await _client.post(
+        Uri.parse('${ApiConfig.baseUrl}/api/users/refresh'),
+        headers: {
+          ...ApiConfig.headers,
+          'Authorization': 'Bearer $refreshToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return AuthResponse.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Error al refrescar el token: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Falló la conexión al servidor: $e');
+    }
+  }
+
+  // Función para cerrar sesión
+  Future logout(String accessToken) async {
+    try {
+      final response = await _client.post(
+        Uri.parse('${ApiConfig.baseUrl}/api/users/logout'),
+        headers: {...ApiConfig.headers, 'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Error al cerrar sesión: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Falló la conexión al servidor: $e');
+    }
+  }
+}
+
+
+# ./ATProto/Dockerfile
+FROM node:18-slim
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+CMD ["node", "pds-server.js"]
+
+# ./ATProto/pds-server.js
+import { PDS } from '@atproto/pds';
+
+const config = {
+  port: process.env.PORT || 3000,
+  hostname: process.env.HOSTNAME || 'localhost',
+  dbPostgresUrl: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/atproto',
+  jwtSecret: process.env.JWT_SECRET || 'un-secreto-muy-seguro-de-mas-de-32-caracteres',
+  serviceDid: process.env.SERVICE_DID || 'did:web:your-domain.com',
+  serverDid: process.env.SERVER_DID || 'did:web:your-domain.com',
+  adminPassword: process.env.ADMIN_PASSWORD || 'admin-password-seguro',
+};
+
+async function main() {
+  try {
+    const server = await PDS.create(config);
+    console.log(`🚀 PDS server running at ${server.url}`);
+    
+    // Handle clean shutdown
+    process.on('SIGTERM', () => server.destroy().finally(() => process.exit(0)));
+    process.on('SIGINT', () => server.destroy().finally(() => process.exit(0)));
+    
+  } catch (err) {
+    console.error('❌ Failed to start server:', err);
+    // Log the full error details for more information
+    console.error(err.stack);
+    process.exit(1);
+  }
+}
+
+main();
+
+# ./api/Dockerfile
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# ./api/app/__init__.py
+
+
+# ./api/app/main.py
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from .routers import users, posts
+
+app = FastAPI(title="INMAX")
+
+# CORS Configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Routers
+app.include_router(users.router, prefix="/api/users", tags=["users"])
+#app.include_router(posts.router, prefix="/api/posts", tags=["posts"])
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to INMAX"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+
+# ./api/app/routers/users.py
+from fastapi import APIRouter, HTTPException, Depends
+import httpx
+from pydantic import BaseModel
+
+router = APIRouter()
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+
+@router.post("/")
+async def create_user(user: UserCreate):
+    """
+    Crea un nuevo usuario utilizando el servidor ATProto
+    """
+    try:
+        # Llamada al servicio ATProto
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "http://localhost:3000/xrpc/com.atproto.server.createAccount",
+                json={
+                    "email": user.email,
+                    "password": user.password,
+                    "handle": user.username
+                }
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=response.status_code, detail=response.json())
+                
+            return response.json()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
