@@ -144,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               56,
                               93,
                               1,
-                            ), //Sin Gradiente por ahora, se ve feo, luego lo cambio (atte: el xupa)
+                            ),
                             Color.fromRGBO(255, 56, 93, 1),
                           ],
                           begin: Alignment.topLeft,

@@ -1,5 +1,4 @@
 import 'package:atproto/core.dart';
-import 'package:bluesky/bluesky.dart';
 import 'package:atproto/atproto.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -14,6 +13,7 @@ class AuthService {
         password: password,
       );
       session = response.data;
+      print('Session data: ${jsonEncode(session)}');
       return true;
     } catch (e) {
       print('Login failed: $e');
