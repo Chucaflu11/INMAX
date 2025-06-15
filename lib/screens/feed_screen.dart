@@ -70,11 +70,11 @@ class _FeedScreenState extends State<FeedScreen> {
 
   double getResponsiveSpacing(BuildContext context) {
     if (isDesktop(context)) {
-      return 16;
+      return 8;
     } else if (isTablet(context)) {
-      return 14;
+      return 7;
     } else {
-      return 12;
+      return 6;
     }
   }
 
@@ -90,7 +90,7 @@ class _FeedScreenState extends State<FeedScreen> {
         Uri.parse('https://bsky.social/xrpc/app.bsky.feed.getFeed').replace(
           queryParameters: {
             'feed':
-            'at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.generator/whats-hot',
+                'at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.generator/whats-hot',
             'limit': '30',
           },
         ),
@@ -109,7 +109,7 @@ class _FeedScreenState extends State<FeedScreen> {
           isLoading = false;
           if (posts.isEmpty) {
             errorMessage =
-            'No se encontraron posts con imágenes en What\'s Hot';
+                'No se encontraron posts con imágenes en What\'s Hot';
           }
         });
       } else {
@@ -144,7 +144,7 @@ class _FeedScreenState extends State<FeedScreen> {
             if (mediaType == 'app.bsky.embed.images#view') {
               hasImages =
                   media['images'] != null &&
-                      (media['images'] as List).isNotEmpty;
+                  (media['images'] as List).isNotEmpty;
             }
           }
         }
@@ -193,7 +193,7 @@ class _FeedScreenState extends State<FeedScreen> {
         isLoading = false;
         if (posts.isEmpty) {
           errorMessage =
-          'No se pudieron cargar posts con imágenes desde ningún feed';
+              'No se pudieron cargar posts con imágenes desde ningún feed';
         }
       });
     } catch (e) {
@@ -304,20 +304,20 @@ class _FeedScreenState extends State<FeedScreen> {
       ];
       isLoading = false;
       errorMessage =
-      'Mostrando contenido de demostración - What\'s Hot no disponible';
+          'Mostrando contenido de demostración - What\'s Hot no disponible';
     });
   }
 
   Widget _buildCard(
-      String imageUrl,
-      String title,
-      String likes,
-      String handle,
-      ) {
+    String imageUrl,
+    String title,
+    String likes,
+    String handle,
+  ) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardWidth = constraints.maxWidth;
-        final imageHeight = cardWidth * 0.75;
+        final imageHeight = cardWidth;
 
         final titleFontSize = isDesktop(context)
             ? 16.0
@@ -356,66 +356,66 @@ class _FeedScreenState extends State<FeedScreen> {
                   borderRadius: BorderRadius.circular(12),
                   child: imageUrl.isNotEmpty && imageUrl.startsWith('https')
                       ? Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.grey[300],
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.image_not_supported,
-                                size: iconSize * 2.5,
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Imagen no disponible',
-                                style: TextStyle(
-                                  fontSize: handleFontSize,
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[300],
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.image_not_supported,
+                                      size: iconSize * 2.5,
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      'Imagen no disponible',
+                                      style: TextStyle(
+                                        fontSize: handleFontSize,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
-                                textAlign: TextAlign.center,
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        color: Colors.grey[300],
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    },
-                  )
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
+                        )
                       : Container(
-                    color: Colors.blue[100],
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.image,
-                            size: iconSize * 2.5,
-                            color: Colors.blue,
+                          color: Colors.blue[100],
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.image,
+                                  size: iconSize * 2.5,
+                                  color: Colors.blue,
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Imagen demo',
+                                  style: TextStyle(fontSize: handleFontSize),
+                                ),
+                              ],
+                            ),
                           ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Imagen demo',
-                            style: TextStyle(fontSize: handleFontSize),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                        ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
                 title,
                 style: TextStyle(
@@ -425,7 +425,7 @@ class _FeedScreenState extends State<FeedScreen> {
                 maxLines: isMobile(context) ? 1 : 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 1),
               Text(
                 '@$handle',
                 style: TextStyle(
@@ -435,7 +435,7 @@ class _FeedScreenState extends State<FeedScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Row(
                 children: [
                   Icon(
@@ -625,38 +625,38 @@ class _FeedScreenState extends State<FeedScreen> {
           child: posts.isEmpty && !isLoading
               ? _buildEmptyState()
               : RefreshIndicator(
-            onRefresh: fetchWhatsHotFeed,
-            child: Padding(
-              padding: getResponsivePadding(context),
-              child: GridView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: getCrossAxisCount(context),
-                  crossAxisSpacing: getResponsiveSpacing(context),
-                  mainAxisSpacing: getResponsiveSpacing(context),
-                  childAspectRatio: getChildAspectRatio(context),
+                  onRefresh: fetchWhatsHotFeed,
+                  child: Padding(
+                    padding: getResponsivePadding(context),
+                    child: GridView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: getCrossAxisCount(context),
+                        crossAxisSpacing: getResponsiveSpacing(context),
+                        mainAxisSpacing: getResponsiveSpacing(context),
+                        childAspectRatio: getChildAspectRatio(context),
+                      ),
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        final post = posts[index]['post'];
+                        final author = post['author'];
+                        final embed = post['embed'];
+
+                        final imageUrl = getImageUrl(embed);
+                        final title =
+                            author['displayName'] ??
+                            author['handle']?.split('.')[0] ??
+                            'Usuario';
+                        final handle =
+                            author['handle']?.replaceAll('.bsky.social', '') ??
+                            'usuario';
+                        final likes = post['likeCount']?.toString() ?? '0';
+
+                        return _buildCard(imageUrl, title, likes, handle);
+                      },
+                    ),
+                  ),
                 ),
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  final post = posts[index]['post'];
-                  final author = post['author'];
-                  final embed = post['embed'];
-
-                  final imageUrl = getImageUrl(embed);
-                  final title =
-                      author['displayName'] ??
-                          author['handle']?.split('.')[0] ??
-                          'Usuario';
-                  final handle =
-                      author['handle']?.replaceAll('.bsky.social', '') ??
-                          'usuario';
-                  final likes = post['likeCount']?.toString() ?? '0';
-
-                  return _buildCard(imageUrl, title, likes, handle);
-                },
-              ),
-            ),
-          ),
         ),
       ],
     );

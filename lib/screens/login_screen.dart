@@ -139,12 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ShaderMask(
                         shaderCallback: (bounds) => LinearGradient(
                           colors: [
-                            Color.fromRGBO(
-                              255,
-                              56,
-                              93,
-                              1,
-                            ),
+                            Color.fromRGBO(255, 56, 93, 1),
                             Color.fromRGBO(255, 56, 93, 1),
                           ],
                           begin: Alignment.topLeft,

@@ -77,7 +77,8 @@ class _StageScreenState extends State<StageScreen> {
         final String? embedType = embed['\$type'] as String?;
         if (embedType == 'app.bsky.embed.images#view' ||
             embedType == 'app.bsky.embed.images') {
-          return embed['images'] != null && (embed['images'] as List).isNotEmpty;
+          return embed['images'] != null &&
+              (embed['images'] as List).isNotEmpty;
         } else if (embedType == 'app.bsky.embed.recordWithMedia#view') {
           if (embed['media'] != null) {
             final media = embed['media'];
@@ -180,7 +181,10 @@ class _StageScreenState extends State<StageScreen> {
               top: 24,
               right: 24,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.35),
                   borderRadius: BorderRadius.circular(24),

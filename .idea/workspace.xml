@@ -10,13 +10,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0f9332d1-7f95-4480-a36b-a38a57efa450" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/assets/taxmanMockup.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/create_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/create_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/feed_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/feed_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/home_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/home_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/login_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/login_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/music_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/music_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/profile_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/profile_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/stage_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/stage_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,26 +53,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
-    &quot;ResourceManagerPrefKey.ResourceType&quot;: &quot;DRAWABLE&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;io.flutter.reload.alreadyRun&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "Flutter.main.dart.executor": "Run",
+    "ResourceManagerPrefKey.ResourceType": "DRAWABLE",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "io.flutter.reload.alreadyRun": "true",
+    "kotlin-language-version-configured": "true",
+    "settings.editor.selected.configurable": "AndroidSdkUpdater",
+    "show.migrate.to.gradle.popup": "false"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\chuca\StudioProjects\INMAX\assets" />

@@ -116,10 +116,14 @@ class _CreateScreenState extends State<CreateScreen> {
                               alignment: Alignment.center,
                               child: file == null
                                   ? Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.add_photo_alternate,
-                                            color: Colors.pinkAccent, size: isWide ? 48 : 36),
+                                        Icon(
+                                          Icons.add_photo_alternate,
+                                          color: Colors.pinkAccent,
+                                          size: isWide ? 48 : 36,
+                                        ),
                                         SizedBox(height: 8),
                                         Text(
                                           'Seleccionar imagen',
@@ -131,9 +135,14 @@ class _CreateScreenState extends State<CreateScreen> {
                                       ],
                                     )
                                   : Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.image, color: Colors.green, size: isWide ? 44 : 32),
+                                        Icon(
+                                          Icons.image,
+                                          color: Colors.green,
+                                          size: isWide ? 44 : 32,
+                                        ),
                                         SizedBox(height: 8),
                                         Text(
                                           file.name,

@@ -107,7 +107,9 @@ class _MusicScreenState extends State<MusicScreen> {
                         child: SliderTheme(
                           data: SliderTheme.of(context).copyWith(
                             trackHeight: isWide ? 8 : 5,
-                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 0),
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 0,
+                            ),
                             overlayShape: SliderComponentShape.noOverlay,
                             activeTrackColor: pink.withOpacity(0.85),
                             inactiveTrackColor: Colors.white.withOpacity(0.25),
@@ -131,7 +133,9 @@ class _MusicScreenState extends State<MusicScreen> {
                           ),
                           child: Icon(
                             isLiked ? Icons.favorite : Icons.favorite_border,
-                            color: isLiked ? pink : Colors.white.withOpacity(0.7),
+                            color: isLiked
+                                ? pink
+                                : Colors.white.withOpacity(0.7),
                             size: isWide ? 34 : 26,
                           ),
                         ),
@@ -144,8 +148,11 @@ class _MusicScreenState extends State<MusicScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.skip_previous_rounded,
-                            color: Colors.white, size: isWide ? 38 : 28),
+                        icon: Icon(
+                          Icons.skip_previous_rounded,
+                          color: Colors.white,
+                          size: isWide ? 38 : 28,
+                        ),
                         onPressed: () {},
                         splashRadius: isWide ? 28 : 22,
                       ),
@@ -163,16 +170,22 @@ class _MusicScreenState extends State<MusicScreen> {
                           ],
                         ),
                         child: IconButton(
-                          icon: Icon(Icons.play_arrow_rounded,
-                              color: Colors.white, size: isWide ? 44 : 32),
+                          icon: Icon(
+                            Icons.play_arrow_rounded,
+                            color: Colors.white,
+                            size: isWide ? 44 : 32,
+                          ),
                           onPressed: () {},
                           splashRadius: isWide ? 32 : 24,
                         ),
                       ),
                       SizedBox(width: isWide ? 32 : 18),
                       IconButton(
-                        icon: Icon(Icons.skip_next_rounded,
-                            color: Colors.white, size: isWide ? 38 : 28),
+                        icon: Icon(
+                          Icons.skip_next_rounded,
+                          color: Colors.white,
+                          size: isWide ? 38 : 28,
+                        ),
                         onPressed: () {},
                         splashRadius: isWide ? 28 : 22,
                       ),
