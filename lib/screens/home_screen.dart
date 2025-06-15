@@ -76,7 +76,7 @@ import 'profile_screen.dart';
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          "Song Name",
+                          "Taxman",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: titleFontSize,
@@ -86,7 +86,7 @@ import 'profile_screen.dart';
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          "Artist Name",
+                          "The Beatles",
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: subtitleFontSize,
@@ -194,13 +194,13 @@ import 'profile_screen.dart';
         case 0:
           return FeedScreen();
         case 1:
-          return const Center(child: Text('Stage Screen', style: TextStyle(fontSize: 24)));
+          return StageScreen();
         case 2:
           return CreateScreen();
         case 3:
-          return const Center(child: Text('Music Screen', style: TextStyle(fontSize: 24)));
+          return MusicScreen();
         case 4:
-          return const Center(child: Text('Profile Screen', style: TextStyle(fontSize: 24)));
+          return ProfileScreen();
         default:
           return FeedScreen();
       }
@@ -216,7 +216,8 @@ import 'profile_screen.dart';
         body: Column(
           children: [
             Expanded(child: _getBody()),
-            _buildPlayerBar(),
+            if (_selectedIndex != 3) _buildPlayerBar(),
+            // Oculta la barra en MusicScreen
           ],
         ),
         bottomNavigationBar: _buildBottomNav(),
