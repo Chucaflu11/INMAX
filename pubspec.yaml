@@ -38,6 +38,7 @@ dependencies:
   atproto: ^0.13.3
   flutter_svg: ^2.1.0
   http: ^1.4.0
+  file_picker: ^10.2.0
 
 dev_dependencies:
   flutter_test:
