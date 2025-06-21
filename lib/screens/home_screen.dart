@@ -4,38 +4,29 @@ import 'stage_screen.dart';
 import 'create_screen.dart';
 import 'music_screen.dart';
 import 'profile_screen.dart';
+import 'settings_screen.dart'; // ← Importa la pantalla real de Settings
 
 // Pantallas simples para cada opción
 class AdsScreen extends StatelessWidget {
   const AdsScreen({super.key});
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Ads')),
-    body: const Center(child: Text('Pantalla de Ads')),
-  );
+        appBar: AppBar(title: const Text('Ads')),
+        body: const Center(child: Text('Pantalla de Ads')),
+      );
 }
 
 class DiscoverScreen extends StatelessWidget {
   const DiscoverScreen({super.key});
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Discover')),
-    body: const Center(child: Text('Pantalla de Discover')),
-  );
-}
-
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Settings')),
-    body: const Center(child: Text('Pantalla de Settings')),
-  );
+        appBar: AppBar(title: const Text('Discover')),
+        body: const Center(child: Text('Pantalla de Discover')),
+      );
 }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -43,18 +34,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  bool isTablet(BuildContext context) {
-    return MediaQuery.of(context).size.width >= 600 &&
-        MediaQuery.of(context).size.width < 1200;
-  }
+  bool isTablet(BuildContext context) =>
+      MediaQuery.of(context).size.width >= 600 &&
+      MediaQuery.of(context).size.width < 1200;
 
-  bool isDesktop(BuildContext context) {
-    return MediaQuery.of(context).size.width >= 1200;
-  }
+  bool isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= 1200;
 
-  bool isMobile(BuildContext context) {
-    return MediaQuery.of(context).size.width < 600;
-  }
+  bool isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < 600;
 
   Widget _buildPlayerBar() {
     return LayoutBuilder(
@@ -62,23 +50,23 @@ class _HomeScreenState extends State<HomeScreen> {
         final padding = isDesktop(context)
             ? 20.0
             : isTablet(context)
-            ? 16.0
-            : 12.0;
+                ? 16.0
+                : 12.0;
         final titleFontSize = isDesktop(context)
             ? 16.0
             : isTablet(context)
-            ? 15.0
-            : 14.0;
+                ? 15.0
+                : 14.0;
         final subtitleFontSize = isDesktop(context)
             ? 14.0
             : isTablet(context)
-            ? 13.0
-            : 12.0;
+                ? 13.0
+                : 12.0;
         final iconSize = isDesktop(context)
             ? 28.0
             : isTablet(context)
-            ? 26.0
-            : 24.0;
+                ? 26.0
+                : 24.0;
 
         return Container(
           decoration: BoxDecoration(
@@ -139,8 +127,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final iconSize = isDesktop(context)
         ? 28.0
         : isTablet(context)
-        ? 26.0
-        : 24.0;
+            ? 26.0
+            : 24.0;
     final showLabels = isTablet(context) || isDesktop(context);
 
     return BottomNavigationBar(
@@ -200,9 +188,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: const Text('Ads'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.of(
-                    context,
-                  ).push(MaterialPageRoute(builder: (_) => const AdsScreen()));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const AdsScreen()),
+                  );
                 },
               ),
               ListTile(
@@ -240,12 +228,12 @@ class _HomeScreenState extends State<HomeScreen> {
           title: Row(
             children: [
               Image.asset(
-                'assets/icons/inmaxpng.png',
+                'assets/icons/logoapp.png',
                 height: isDesktop(context)
                     ? 60
                     : isTablet(context)
-                    ? 55
-                    : 50,
+                        ? 55
+                        : 50,
               ),
               const Spacer(),
               IconButton(

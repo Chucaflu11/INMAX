@@ -51,6 +51,25 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 
+  # Permite generar automáticamente íconos personalizados
+  flutter_launcher_icons: ^0.13.1
+
+  # Permite personalizar la pantalla de carga inicial
+  flutter_native_splash: ^2.4.0
+
+# Configuración del ícono de la app
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/logoapp.png"
+
+# Configuración del splash screen
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/icons/logoapp.png
+  android: true
+  ios: true
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -64,7 +83,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/icons/inmaxpng.png
+    - assets/icons/logoapp.png
     - assets/taxmanMockup.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see

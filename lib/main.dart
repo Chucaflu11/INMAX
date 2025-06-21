@@ -6,6 +6,8 @@ void main() {
 }
 
 class INMAXApp extends StatelessWidget {
+  const INMAXApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
