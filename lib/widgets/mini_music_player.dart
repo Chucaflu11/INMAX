@@ -39,13 +39,13 @@ class MiniMusicPlayer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    musicProvider.currentSong?.title ?? '',
+                    musicProvider.currentSong?.name ?? '',
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    musicProvider.currentSong?.artist ?? '',
+                    musicProvider.currentSong?.artistName ?? '',
                     style: const TextStyle(color: Colors.white70, fontSize: 12),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

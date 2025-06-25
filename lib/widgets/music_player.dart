@@ -41,21 +41,26 @@ class MusicPlayer extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 child: AspectRatio(
                   aspectRatio: 1,
-                  child: Image.asset(
-                    'assets/taxmanMockup.jpg',
-                    fit: BoxFit.cover,
-                  ),
+                  child: (musicProvider.currentSong != null && musicProvider.currentSong!.albumImage.isNotEmpty)
+                      ? Image.network(
+                          musicProvider.currentSong!.albumImage,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          'assets/taxmanMockup.jpg',
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
               const SizedBox(height: 20),
               Text(
-                musicProvider.currentSong?.title ?? '',
+                musicProvider.currentSong?.name ?? '',
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
-                musicProvider.currentSong?.artist ?? '',
+                musicProvider.currentSong?.artistName ?? '',
                 style: const TextStyle(color: Colors.black54, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
