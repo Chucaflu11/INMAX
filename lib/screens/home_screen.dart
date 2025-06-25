@@ -5,6 +5,7 @@ import 'create_screen.dart';
 import 'music_screen.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart'; // ← Importa la pantalla real de Settings
+import 'ads_screen.dart';
 
 // Pantallas simples para cada opción
 class AdsScreen extends StatelessWidget {
@@ -12,7 +13,10 @@ class AdsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: const Text('Ads')),
-        body: const Center(child: Text('Pantalla de Ads')),
+        body: const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: AdsContent(),
+        ),
       );
 }
 
@@ -21,7 +25,10 @@ class DiscoverScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: const Text('Discover')),
-        body: const Center(child: Text('Pantalla de Discover')),
+        body: const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: AdsContent(),
+        ),
       );
 }
 
