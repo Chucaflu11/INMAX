@@ -5,7 +5,6 @@ import '../models/ad_model.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 
 class AdsScreen extends StatelessWidget {
   const AdsScreen({super.key});

@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/music_provider.dart';
 import 'screens/login_screen.dart';
 
 void main() {
-  runApp(INMAXApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MusicProvider()),
+      ],
+      child: const INMAXApp(),
+    ),
+  );
 }
 
 class INMAXApp extends StatelessWidget {
@@ -12,11 +21,12 @@ class INMAXApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'INMAX',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.red,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: LoginScreen(),
+      home: const LoginScreen(),
     );
   }
 }

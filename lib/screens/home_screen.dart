@@ -4,10 +4,10 @@ import 'stage_screen.dart';
 import 'create_screen.dart';
 import 'music_screen.dart';
 import 'profile_screen.dart';
-import 'settings_screen.dart'; // ← Importa la pantalla real de Settings
+import 'settings_screen.dart';
 import 'ads_screen.dart';
+import '../widgets/mini_music_player.dart';
 
-// Pantallas simples para cada opción
 class AdsScreen extends StatelessWidget {
   const AdsScreen({super.key});
   @override
@@ -26,8 +26,8 @@ class DiscoverScreen extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: const Text('Discover')),
         body: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: AdsContent(),
+          padding: EdgeInsets.all(16.0),
+          child: AdsContent(),
         ),
       );
 }
@@ -35,7 +35,7 @@ class DiscoverScreen extends StatelessWidget {
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -50,85 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < 600;
-
-  Widget _buildPlayerBar() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final padding = isDesktop(context)
-            ? 20.0
-            : isTablet(context)
-                ? 16.0
-                : 12.0;
-        final titleFontSize = isDesktop(context)
-            ? 16.0
-            : isTablet(context)
-                ? 15.0
-                : 14.0;
-        final subtitleFontSize = isDesktop(context)
-            ? 14.0
-            : isTablet(context)
-                ? 13.0
-                : 12.0;
-        final iconSize = isDesktop(context)
-            ? 28.0
-            : isTablet(context)
-                ? 26.0
-                : 24.0;
-
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [const Color(0xFFFF385D), const Color(0xFF591421)],
-            ),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: padding, vertical: 8),
-          child: SafeArea(
-            top: false,
-            child: Row(
-              children: [
-                Icon(Icons.pause, color: Colors.white, size: iconSize),
-                SizedBox(width: padding),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Taxman",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        "The Beatles",
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: subtitleFontSize,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.favorite_border,
-                  color: Colors.white,
-                  size: iconSize,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildBottomNav() {
     final iconSize = isDesktop(context)
@@ -260,34 +181,39 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _getBody() {
     switch (_selectedIndex) {
       case 0:
-        return FeedScreen();
+        return const FeedScreen();
       case 1:
-        return StageScreen();
+        return const StageScreen();
       case 2:
-        return CreateScreen();
+        return const CreateScreen();
       case 3:
-        return MusicScreen();
+        return const MusicScreen();
       case 4:
-        return ProfileScreen();
+        return const ProfileScreen();
       default:
-        return FeedScreen();
+        return const FeedScreen();
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: _buildAppBar(),
-      ),
-      body: Column(
-        children: [
-          Expanded(child: _getBody()),
-          if (_selectedIndex != 3) _buildPlayerBar(),
-        ],
-      ),
-      bottomNavigationBar: _buildBottomNav(),
-    );
-  }
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: PreferredSize(
+      preferredSize: const Size.fromHeight(kToolbarHeight),
+      child: _buildAppBar(),
+    ),
+    body: Stack(
+      children: [
+        _getBody(), // Tu vista principal
+        const Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: MiniMusicPlayer(),
+        ),
+      ],
+    ),
+    bottomNavigationBar: _buildBottomNav(),
+  );
+}
 }
