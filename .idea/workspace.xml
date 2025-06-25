@@ -10,15 +10,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0f9332d1-7f95-4480-a36b-a38a57efa450" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/lib/models/jamendo_song.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inmax.iml" beforeDir="false" afterPath="$PROJECT_DIR$/inmax.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/providers/music_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/music_provider.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/music_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/music_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/widgets/mini_music_player.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/mini_music_player.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/widgets/music_player.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/music_player.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +62,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "music__player",
     "ignore.virus.scanning.warn.message": "true",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",

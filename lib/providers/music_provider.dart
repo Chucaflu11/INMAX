@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:http/http.dart' as http;
 import '../models/jamendo_song.dart';
 
@@ -12,6 +13,9 @@ class MusicProvider with ChangeNotifier {
   bool isRepeat = false;
   bool isRepeatOne = false;
   bool isShuffle = false;
+
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  AudioPlayer get audioPlayer => _audioPlayer;
 
   Future<void> fetchJamendoSongs() async {
     final url = Uri.parse(
@@ -27,13 +31,38 @@ class MusicProvider with ChangeNotifier {
     }
   }
 
-  void setSong(JamendoSong song) {
-    currentSong = song;
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  Future<void> playCurrentSong() async {
+    if (currentSong != null) {
+      await _audioPlayer.setUrl(currentSong!.audioUrl);
+      await _audioPlayer.play();
+      isPlaying = true;
+      notifyListeners();
+    }
+  }
+
+  Future<void> pause() async {
+    await _audioPlayer.pause();
+    isPlaying = false;
     notifyListeners();
   }
 
   void togglePlayPause() {
-    isPlaying = !isPlaying;
+    if (isPlaying) {
+      pause();
+    } else {
+      playCurrentSong();
+    }
+  }
+
+  void setSong(JamendoSong song) {
+    currentSong = song;
+    playCurrentSong();
     notifyListeners();
   }
 
