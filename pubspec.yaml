@@ -41,6 +41,7 @@ dependencies:
   http: ^1.4.0
   file_picker: ^10.2.0
   just_audio: ^0.10.4
+  spotify_sdk: ^2.3.0
 
 dev_dependencies:
   flutter_test:
