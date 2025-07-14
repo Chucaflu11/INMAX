@@ -31,9 +31,23 @@
       <excludeFolder url="file://$MODULE_DIR$/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
     </content>
+    <orderEntry type="jdk" jdkName="Android API 35, extension level 13 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />
-    <orderEntry type="library" name="Dart Packages" level="project" />
     <orderEntry type="library" name="Flutter Plugins" level="project" />
+    <orderEntry type="module-library">
+      <library name="spotify_sdk">
+        <CLASSES />
+        <JAVADOC>
+          <root url="file://$USER_HOME$/Desktop/android-sdk-0.8.0-appremote_v2.1.0-auth/app-remote-lib/docs" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="file://$USER_HOME$/Desktop/android-sdk-0.8.0-appremote_v2.1.0-auth" />
+          <root url="file://$USER_HOME$/Desktop/android-sdk-0.8.0-appremote_v2.1.0-auth/app-remote-sample/src/main/java" />
+          <root url="file://$USER_HOME$/Desktop/android-sdk-0.8.0-appremote_v2.1.0-auth/auth-sample/src/main/java" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="Dart Packages" level="project" />
   </component>
 </module>
