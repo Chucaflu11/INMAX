@@ -2,11 +2,41 @@ import 'package:spotify_sdk/spotify_sdk.dart';
 import 'package:spotify_sdk/models/connection_status.dart';
 
 class SpotifyPlayer {
-  static const String clientId = '46065490b0a74d70ab7568ce33b56d1f';
-  static const String redirectUri = 'inmax://callback';
+  static const String clientId = '301d702be72a4154b26818f6c79cfdae';
+  static const String redirectUri = 'com.example.inmax://callback';
 
-  Future<void> connect() async {
+  Future<bool> authenticate() async {
     try {
+      final accessToken = await SpotifySdk.getAccessToken(
+        clientId: clientId,
+        redirectUrl: redirectUri,
+        scope: 'app-remote-control,user-modify-playback-state'
+      );
+
+      if (accessToken != null && accessToken.isNotEmpty) {
+        print(
+          '🔐 Usuario autenticado con token: ${accessToken.substring(0, 10)}...',
+        );
+        return true;
+      }
+      print('❌ Token de autenticación vacío, $accessToken');
+      return false;
+    } catch (e) {
+      print('❌ Error de autenticación: $e');
+      return false;
+    }
+  }
+
+  Future<bool> connect() async {
+    try {
+      // Primero autenticar
+      final authenticated = await authenticate();
+      if (!authenticated) {
+        print('❌ Usuario no autenticado');
+        return false;
+      }
+
+      // Luego conectar al App Remote
       final connected = await SpotifySdk.connectToSpotifyRemote(
         clientId: clientId,
         redirectUrl: redirectUri,
@@ -14,11 +44,14 @@ class SpotifyPlayer {
 
       if (connected) {
         print('🎵 Conectado a Spotify');
+        return true;
       } else {
         print('❌ No se pudo conectar');
+        return false;
       }
     } catch (e) {
       print('❌ Error de conexión: $e');
+      return false;
     }
   }
 
@@ -45,5 +78,23 @@ class SpotifyPlayer {
 
   Future<void> skipPrevious() async {
     await SpotifySdk.skipPrevious();
+  }
+
+  Future<void> seekTo(int positionMs) async {
+    await SpotifySdk.seekToRelativePosition(relativeMilliseconds: positionMs);
+  }
+
+  Future<void> setShuffle(bool shuffle) async {
+    await SpotifySdk.setShuffle(shuffle: shuffle);
+  }
+
+  Future<void> setRepeatMode(bool repeat) async {
+    await SpotifySdk.setRepeatMode(
+      repeatMode: repeat ? RepeatMode.track : RepeatMode.off,
+    );
+  }
+
+  Future<void> disconnect() async {
+    await SpotifySdk.disconnect();
   }
 }

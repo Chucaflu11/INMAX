@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/inmax.iml" filepath="$PROJECT_DIR$/inmax.iml" />
-      <module fileurl="file://$PROJECT_DIR$/android/inmax_android.iml" filepath="$PROJECT_DIR$/android/inmax_android.iml" />
     </modules>
   </component>
 </project>
