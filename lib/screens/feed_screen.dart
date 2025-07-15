@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/auth_service.dart';
 
+
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
 
@@ -15,8 +16,8 @@ class _FeedScreenState extends State<FeedScreen> {
   String? errorMessage;
   bool isLoading = false;
 
-  String? get authToken => AuthService.session.accessJwt;
-  String? get userDid => AuthService.session.did;
+  String? get authToken => AuthService.session?.accessJwt;
+  String? get userDid => AuthService.session?.did;  
   bool get isAuthenticated => authToken != null && userDid != null;
 
   @override
@@ -316,6 +317,7 @@ class _FeedScreenState extends State<FeedScreen> {
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final theme = Theme.of(context);
         final cardWidth = constraints.maxWidth;
         final imageHeight = cardWidth;
 
@@ -426,10 +428,10 @@ class _FeedScreenState extends State<FeedScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 1),
+              // Aquí el Text del handle corregido:
               Text(
                 '@$handle',
-                style: TextStyle(
-                  color: Colors.black54,
+                style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: handleFontSize,
                 ),
                 maxLines: 1,
@@ -438,16 +440,17 @@ class _FeedScreenState extends State<FeedScreen> {
               const SizedBox(height: 2),
               Row(
                 children: [
+                  // Icon de favorito corregido:
                   Icon(
                     Icons.favorite_border,
                     size: iconSize,
-                    color: Colors.black54,
+                    color: theme.iconTheme.color,
                   ),
                   const SizedBox(width: 4),
+                  // Text de likes corregido:
                   Text(
                     likes,
-                    style: TextStyle(
-                      color: Colors.black54,
+                    style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: likesFontSize,
                     ),
                   ),

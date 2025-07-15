@@ -16,7 +16,7 @@ class _StageScreenState extends State<StageScreen> {
   String? errorMessage;
   int currentIndex = 0;
 
-  String? get authToken => AuthService.session.accessJwt;
+  String? get authToken => AuthService.session?.accessJwt;
   bool get isAuthenticated => authToken != null;
 
   @override

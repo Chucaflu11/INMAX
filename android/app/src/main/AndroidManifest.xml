@@ -36,7 +36,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:host="callback"
-                    android:scheme="inmax"
+                    android:scheme="com.inmaxapp"
                 />
             </intent-filter>
         </activity>

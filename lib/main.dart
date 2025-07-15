@@ -1,61 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'services/auth_service.dart';
+
 import 'providers/music_provider.dart';
+import 'providers/theme_provider.dart';
+
 import 'screens/login_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/change_password_screen.dart';
+import 'screens/faq_screen.dart';
 
 void main() async {
-  // Necesario para inicialización asíncrona
   WidgetsFlutterBinding.ensureInitialized();
+  final isLoggedIn = await AuthService.isLoggedIn();
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => MusicProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => MusicProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: const INMAXApp(),
+      child: INMAXApp(isLoggedIn: isLoggedIn),
     ),
   );
 }
 
-class INMAXApp extends StatefulWidget {
-  const INMAXApp({super.key});
+class INMAXApp extends StatelessWidget {
+  final bool isLoggedIn;
 
-  @override
-  State<INMAXApp> createState() => _INMAXAppState();
-}
-
-class _INMAXAppState extends State<INMAXApp> {
-  @override
-  void initState() {
-    super.initState();
-    // Inicializar Spotify después de que el widget se monte
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final musicProvider = Provider.of<MusicProvider>(context, listen: false);
-      musicProvider.initializeSpotify();
-    });
-  }
+  const INMAXApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'INMAX',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      home: Consumer<MusicProvider>(
-        builder: (context, musicProvider, child) {
-          // Mostrar LoginScreen hasta que Spotify esté conectado
-          if (!musicProvider.isConnected) {
-            return const LoginScreen();
-          }
-          // Aquí puedes navegar a tu pantalla principal cuando esté conectado
-          return const LoginScreen(); // Cambia por tu pantalla principal
-        },
-      ),
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return Consumer<MusicProvider>(
+      builder: (context, musicProvider, child) {
+        return MaterialApp(
+          title: 'INMAX',
+          debugShowCheckedModeBanner: false,
+          themeMode: themeProvider.currentTheme,
+          theme: ThemeData.light().copyWith(
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              iconTheme: IconThemeData(color: Colors.black87),
+              titleTextStyle: TextStyle(color: Colors.black87, fontSize: 20),
+            ),
+            textTheme: ThemeData.light().textTheme.copyWith(
+              bodySmall: const TextStyle(color: Colors.black54),
+            ),
+            iconTheme: const IconThemeData(color: Colors.black87),
+          ),
+          darkTheme: ThemeData.dark().copyWith(
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.black,
+              elevation: 0,
+              iconTheme: IconThemeData(color: Colors.white70),
+              titleTextStyle: TextStyle(color: Colors.white70, fontSize: 20),
+            ),
+            textTheme: ThemeData.dark().textTheme.copyWith(
+              bodySmall: const TextStyle(color: Colors.white70),
+            ),
+            iconTheme: const IconThemeData(color: Colors.white70),
+          ),
+          home: isLoggedIn ? const HomeScreen() : const LoginScreen(),
+          routes: {
+            '/settings': (_) => const SettingsScreen(),
+            '/perfil': (_) => const ProfileScreen(),
+            '/cambiar-contrasena': (_) => const ChangePasswordScreen(),
+            '/faq': (_) => const FaqScreen(),
+            '/login': (_) => const LoginScreen(),
+          },
+        );
+      },
     );
   }
 }

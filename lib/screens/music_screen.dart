@@ -38,16 +38,17 @@ class _MusicScreenState extends State<MusicScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DefaultTabController(
       length: 4,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: SafeArea(
             child: TabBar(
               labelColor: pink,
-              unselectedLabelColor: Colors.black54,
+              unselectedLabelColor: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
               indicatorColor: pink,
               tabs: const [
                 Tab(text: 'Música'),
@@ -60,9 +61,9 @@ class _MusicScreenState extends State<MusicScreen> {
         ),
         body: TabBarView(
           children: [
-            _buildMusicTab(),
-            _buildAlbumsTab(),
-            _buildPlaylistsTab(),
+            _buildMusicTab(theme),
+            _buildAlbumsTab(theme),
+            _buildPlaylistsTab(theme),
             _buildImportTab(),
           ],
         ),
@@ -70,23 +71,23 @@ class _MusicScreenState extends State<MusicScreen> {
     );
   }
 
-  Widget _buildMusicTab() {
+  Widget _buildMusicTab(ThemeData theme) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: songs.length,
       itemBuilder: (_, i) {
         final song = songs[i];
         return ListTile(
-          leading: const Icon(Icons.music_note, color: Colors.black54),
+          leading: Icon(Icons.music_note, color: theme.iconTheme.color),
           title: Text(
             song['title']!,
-            style: const TextStyle(color: Colors.black87),
+            style: theme.textTheme.bodyLarge,
           ),
           subtitle: Text(
             song['artist']!,
-            style: const TextStyle(color: Colors.black54),
+            style: theme.textTheme.bodyMedium,
           ),
-          trailing: const Icon(Icons.play_arrow, color: Colors.black38),
+          trailing: Icon(Icons.play_arrow, color: theme.iconTheme.color?.withOpacity(0.5)),
           onTap: () {
             spotifyPlayer.play(song['uri']!);
           },
@@ -95,12 +96,12 @@ class _MusicScreenState extends State<MusicScreen> {
     );
   }
 
-  Widget _buildAlbumsTab() => Center(
-        child: Text('Álbumes', style: TextStyle(color: Colors.black)),
+  Widget _buildAlbumsTab(ThemeData theme) => Center(
+        child: Text('Álbumes', style: theme.textTheme.bodyLarge),
       );
 
-  Widget _buildPlaylistsTab() => Center(
-        child: Text('Playlists', style: TextStyle(color: Colors.black)),
+  Widget _buildPlaylistsTab(ThemeData theme) => Center(
+        child: Text('Playlists', style: theme.textTheme.bodyLarge),
       );
 
   Widget _buildImportTab() => Center(

@@ -6,31 +6,8 @@ import 'music_screen.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
 import 'ads_screen.dart';
+import 'discover_screen.dart';
 import '../widgets/mini_music_player.dart';
-
-class AdsScreen extends StatelessWidget {
-  const AdsScreen({super.key});
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Ads')),
-        body: const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: AdsContent(),
-        ),
-      );
-}
-
-class DiscoverScreen extends StatelessWidget {
-  const DiscoverScreen({super.key});
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Discover')),
-        body: const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: AdsContent(),
-        ),
-      );
-}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,9 +18,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  bool isTablet(BuildContext context) =>
-      MediaQuery.of(context).size.width >= 600 &&
-      MediaQuery.of(context).size.width < 1200;
+  bool isTablet(BuildContext context) {
+    return MediaQuery.of(context).size.width >= 600 &&
+        MediaQuery.of(context).size.width < 1200;
+  }
 
   bool isDesktop(BuildContext context) =>
       MediaQuery.of(context).size.width >= 1200;
@@ -60,39 +38,35 @@ class _HomeScreenState extends State<HomeScreen> {
     final showLabels = isTablet(context) || isDesktop(context);
 
     return BottomNavigationBar(
-      backgroundColor: const Color(0xFF1E1E1E),
-      selectedItemColor: const Color(0xFFFF385D),
-      unselectedItemColor: Colors.grey,
+      backgroundColor: const Color(0xFF1E1E1E),  
+      selectedItemColor: const Color(0xFFFF385D), 
+      unselectedItemColor: Colors.grey,           
       type: BottomNavigationBarType.fixed,
       selectedFontSize: showLabels ? 12 : 0,
       unselectedFontSize: showLabels ? 10 : 0,
       iconSize: iconSize,
       currentIndex: _selectedIndex,
-      onTap: (index) {
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
-      items: [
+      onTap: (index) => setState(() => _selectedIndex = index),
+      items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home, size: iconSize),
-          label: showLabels ? "Inicio" : "",
+          icon: Icon(Icons.home),
+          label: 'Inicio',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.grid_view, size: iconSize),
-          label: showLabels ? "Explorar" : "",
+          icon: Icon(Icons.grid_view),
+          label: 'Explorar',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.add_circle_outline, size: iconSize),
-          label: showLabels ? "Crear" : "",
+          icon: Icon(Icons.add_circle_outline),
+          label: 'Crear',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.inbox, size: iconSize),
-          label: showLabels ? "Inbox" : "",
+          icon: Icon(Icons.inbox),
+          label: 'Inbox',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person, size: iconSize),
-          label: showLabels ? "Perfil" : "",
+          icon: Icon(Icons.person),
+          label: 'Perfil',
         ),
       ],
     );
@@ -101,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showMenuSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).canvasColor,
       barrierColor: Colors.black.withOpacity(0.35),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
@@ -112,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.campaign, color: Color(0xFFFF385D)),
+                leading: Icon(Icons.campaign, color: Theme.of(context).colorScheme.secondary),
                 title: const Text('Ads'),
                 onTap: () {
                   Navigator.pop(context);
@@ -122,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.explore, color: Color(0xFFFF385D)),
+                leading: Icon(Icons.explore, color: Theme.of(context).colorScheme.secondary),
                 title: const Text('Discover'),
                 onTap: () {
                   Navigator.pop(context);
@@ -132,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.settings, color: Color(0xFFFF385D)),
+                leading: Icon(Icons.settings, color: Theme.of(context).colorScheme.secondary),
                 title: const Text('Settings'),
                 onTap: () {
                   Navigator.pop(context);
@@ -150,31 +124,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAppBar() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return AppBar(
-          title: Row(
-            children: [
-              Image.asset(
-                'assets/icons/logoapp.png',
-                height: isDesktop(context)
-                    ? 60
-                    : isTablet(context)
-                        ? 55
-                        : 50,
-              ),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.more_vert),
-                onPressed: _showMenuSheet,
-              ),
-            ],
+    final theme = Theme.of(context);
+    return AppBar(
+      title: Row(
+        children: [
+          Image.asset('assets/icons/inmaxpng.png', height: isDesktop(context) ? 60 : isTablet(context) ? 55 : 50),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: _showMenuSheet,
           ),
-          backgroundColor: Colors.white,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-        );
-      },
+        ],
+      ),
+      backgroundColor: theme.appBarTheme.backgroundColor,
+      elevation: theme.appBarTheme.elevation,
+      automaticallyImplyLeading: false,
     );
   }
 
@@ -195,25 +159,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: PreferredSize(
-      preferredSize: const Size.fromHeight(kToolbarHeight),
-      child: _buildAppBar(),
-    ),
-    body: Stack(
-      children: [
-        _getBody(), // Tu vista principal
-        const Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: MiniMusicPlayer(),
-        ),
-      ],
-    ),
-    bottomNavigationBar: _buildBottomNav(),
-  );
-}
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: _buildAppBar(),
+      ),
+      body: Stack(
+        children: [
+          _getBody(),
+          const Positioned(left: 0, right: 0, bottom: 0, child: MiniMusicPlayer()),
+        ],
+      ),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
 }
