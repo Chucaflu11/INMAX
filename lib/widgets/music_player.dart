@@ -68,8 +68,11 @@ class MusicPlayer extends StatelessWidget {
               _buildControls(context, musicProvider),
               const SizedBox(height: 20),
               Slider(
-                value: 0.3,
-                onChanged: (v) {},
+                value: musicProvider.progress.clamp(0.0, 1.0),
+                onChanged: (value) {
+                  final newPosition = (value * musicProvider.duration).round();
+                  musicProvider.seekTo(newPosition);
+                },
                 activeColor: pink,
                 inactiveColor: Colors.grey[300],
               ),
