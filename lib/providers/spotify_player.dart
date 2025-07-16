@@ -1,57 +1,79 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spotify_sdk/spotify_sdk.dart';
 import 'package:spotify_sdk/models/connection_status.dart';
 
 class SpotifyPlayer {
-    static const String clientId = '301d702be72a4154b26818f6c79cfdae';
-    static const String redirectUri = 'com.example.inmax://callback';
+  static const String clientId = '301d702be72a4154b26818f6c79cfdae';
+  static const String redirectUri = 'com.example.inmax://callback';
+  static const String _accessTokenKey = 'spotify_access_token'; //placeholder
 
+  // Guarda el token de acceso
+  Future<void> _saveAccessToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accessTokenKey, token);
+  }
 
-  Future<bool> authenticate() async {
-    try {
-      final accessToken = await SpotifySdk.getAccessToken(
-        clientId: clientId,
-        redirectUrl: redirectUri,
-        scope: 'app-remote-control,user-modify-playback-state'
-      );
-
-      if (accessToken != null && accessToken.isNotEmpty) {
-        print(
-          '🔐 Usuario autenticado con token: ${accessToken.substring(0, 10)}...',
-        );
-        return true;
-      }
-      print('❌ Token de autenticación vacío, $accessToken');
-      return false;
-    } catch (e) {
-      print('❌ Error de autenticación: $e');
-      return false;
-    }
+  // Recupera el token de acceso
+  Future<String?> _getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_accessTokenKey);
   }
 
   Future<bool> connect() async {
     try {
-      // Primero autenticar
-      final authenticated = await authenticate();
-      if (!authenticated) {
-        print('❌ Usuario no autenticado');
-        return false;
+      // Intenta conectar con un token guardado
+      String? accessToken = await _getAccessToken();
+      if (accessToken != null) {
+        final connected = await SpotifySdk.connectToSpotifyRemote(
+          clientId: clientId,
+          redirectUrl: redirectUri,
+          accessToken: accessToken,
+        );
+        if (connected) {
+          print('🎵 Conectado usando token guardado');
+          return true;
+        }
+        print(
+          '⚠️ El token guardado no funcionó, se necesita nueva autenticación.',
+        );
       }
 
-      // Luego conectar al App Remote
-      final connected = await SpotifySdk.connectToSpotifyRemote(
-        clientId: clientId,
-        redirectUrl: redirectUri,
-      );
-
-      if (connected) {
-        print('🎵 Conectado a Spotify');
-        return true;
-      } else {
-        print('❌ No se pudo conectar');
-        return false;
-      }
+      // Si no hay token o falló, autenticar para obtener uno nuevo
+      return await authenticateAndConnect();
     } catch (e) {
       print('❌ Error de conexión: $e');
+      // Si hay un error, podría ser por un token inválido. Forzar re-autenticación.
+      return await authenticateAndConnect();
+    }
+  }
+
+  Future<bool> authenticateAndConnect() async {
+    try {
+      final accessToken = await SpotifySdk.getAccessToken(
+        clientId: clientId,
+        redirectUrl: redirectUri,
+        scope: 'app-remote-control,user-modify-playback-state',
+      );
+
+      if (accessToken.isNotEmpty) {
+        await _saveAccessToken(accessToken); // Guarda el nuevo token
+        print('🔐 Usuario autenticado y token guardado.');
+
+        final connected = await SpotifySdk.connectToSpotifyRemote(
+          clientId: clientId,
+          redirectUrl: redirectUri,
+          accessToken: accessToken,
+        );
+
+        if (connected) {
+          print('🎵 Conectado a Spotify');
+          return true;
+        }
+      }
+      print('❌ No se pudo obtener el token de acceso.');
+      return false;
+    } catch (e) {
+      print('❌ Error en authenticateAndConnect: $e');
       return false;
     }
   }
@@ -62,6 +84,7 @@ class SpotifyPlayer {
       print('▶️ Reproduciendo $uri');
     } catch (e) {
       print('❌ Error al reproducir: $e');
+      await authenticateAndConnect();
     }
   }
 
