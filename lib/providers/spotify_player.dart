@@ -2,8 +2,8 @@ import 'package:spotify_sdk/spotify_sdk.dart';
 import 'package:spotify_sdk/models/connection_status.dart';
 
 class SpotifyPlayer {
-    static const String clientId = 'b48417f08d3041999c64fc5e55530635';
-    static const String redirectUri = 'com.inmaxapp://callback';
+    static const String clientId = '301d702be72a4154b26818f6c79cfdae';
+    static const String redirectUri = 'com.example.inmax://callback';
 
 
   Future<bool> authenticate() async {
