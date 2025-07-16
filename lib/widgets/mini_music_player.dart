@@ -12,8 +12,6 @@ class MiniMusicPlayer extends StatelessWidget {
 
     if (musicProvider.currentSong == null) return const SizedBox.shrink();
 
-    const pink = Color(0xFFFF385D);
-
     return GestureDetector(
       onTap: () {
         showModalBottomSheet(

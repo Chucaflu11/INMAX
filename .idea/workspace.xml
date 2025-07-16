@@ -10,15 +10,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0f9332d1-7f95-4480-a36b-a38a57efa450" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/models/song.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/song.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/providers/music_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/music_provider.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/providers/spotify_player.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/spotify_player.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/music_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/music_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/widgets/mini_music_player.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/mini_music_player.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/widgets/music_player.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/music_player.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,6 +60,9 @@
     &quot;accountId&quot;: &quot;86335b6d-14b3-4aef-b5fb-dc1068211afb&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>

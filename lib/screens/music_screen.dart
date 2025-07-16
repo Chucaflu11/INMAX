@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../providers/spotify_player.dart';
+import 'package:provider/provider.dart';
+import '../providers/music_provider.dart';
+import '../models/song.dart';
 
 class MusicScreen extends StatefulWidget {
   const MusicScreen({super.key});
@@ -10,30 +12,37 @@ class MusicScreen extends StatefulWidget {
 
 class _MusicScreenState extends State<MusicScreen> {
   final Color pink = const Color(0xFFFF385D);
-  final SpotifyPlayer spotifyPlayer = SpotifyPlayer();
 
-  final List<Map<String, String>> songs = [
-    {
-      'title': 'Imagine',
-      'artist': 'John Lennon',
-      'uri': 'spotify:track:7pKfPomDEeI4TPT6EOYjn9',
-    },
-    {
-      'title': 'Bohemian Rhapsody',
-      'artist': 'Queen',
-      'uri': 'spotify:track:7tFiyTwD0nx5a1eklYtX2J',
-    },
-    {
-      'title': 'Billie Jean',
-      'artist': 'Michael Jackson',
-      'uri': 'spotify:track:5ChkMS8OtdzJeqyybCc9R5',
-    },
+  final List<Song> songs = [
+    Song(
+      name: 'Imagine',
+      artistName: 'John Lennon',
+      albumImage: '',
+      spotifyUri: 'spotify:track:7pKfPomDEeI4TPT6EOYjn9',
+    ),
+    Song(
+      name: 'Bohemian Rhapsody',
+      artistName: 'Queen',
+      albumImage: '',
+      spotifyUri: 'spotify:track:7tFiyTwD0nx5a1eklYtX2J',
+    ),
+    Song(
+      name: 'Billie Jean',
+      artistName: 'Michael Jackson',
+      albumImage: '',
+      spotifyUri: 'spotify:track:5ChkMS8OtdzJeqyybCc9R5',
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => spotifyPlayer.connect());
+    Future.microtask(
+      () => Provider.of<MusicProvider>(
+        context,
+        listen: false,
+      ).initializeSpotify(),
+    );
   }
 
   @override
@@ -48,7 +57,8 @@ class _MusicScreenState extends State<MusicScreen> {
           child: SafeArea(
             child: TabBar(
               labelColor: pink,
-              unselectedLabelColor: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+              unselectedLabelColor: theme.textTheme.bodyMedium?.color
+                  ?.withOpacity(0.6),
               indicatorColor: pink,
               tabs: const [
                 Tab(text: 'Música'),
@@ -72,47 +82,49 @@ class _MusicScreenState extends State<MusicScreen> {
   }
 
   Widget _buildMusicTab(ThemeData theme) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: songs.length,
-      itemBuilder: (_, i) {
-        final song = songs[i];
-        return ListTile(
-          leading: Icon(Icons.music_note, color: theme.iconTheme.color),
-          title: Text(
-            song['title']!,
-            style: theme.textTheme.bodyLarge,
-          ),
-          subtitle: Text(
-            song['artist']!,
-            style: theme.textTheme.bodyMedium,
-          ),
-          trailing: Icon(Icons.play_arrow, color: theme.iconTheme.color?.withOpacity(0.5)),
-          onTap: () {
-            spotifyPlayer.play(song['uri']!);
+    return Consumer<MusicProvider>(
+      builder: (context, musicProvider, _) {
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: songs.length,
+          itemBuilder: (_, i) {
+            final song = songs[i];
+            return ListTile(
+              leading: Icon(Icons.music_note, color: theme.iconTheme.color),
+              title: Text(song.name, style: theme.textTheme.bodyLarge),
+              subtitle: Text(
+                song.artistName,
+                style: theme.textTheme.bodyMedium,
+              ),
+              trailing: Icon(
+                Icons.play_arrow,
+                color: theme.iconTheme.color?.withOpacity(0.5),
+              ),
+              onTap: () {
+                musicProvider.playSong(song);
+              },
+            );
           },
         );
       },
     );
   }
 
-  Widget _buildAlbumsTab(ThemeData theme) => Center(
-        child: Text('Álbumes', style: theme.textTheme.bodyLarge),
-      );
+  Widget _buildAlbumsTab(ThemeData theme) =>
+      Center(child: Text('Álbumes', style: theme.textTheme.bodyLarge));
 
-  Widget _buildPlaylistsTab(ThemeData theme) => Center(
-        child: Text('Playlists', style: theme.textTheme.bodyLarge),
-      );
+  Widget _buildPlaylistsTab(ThemeData theme) =>
+      Center(child: Text('Playlists', style: theme.textTheme.bodyLarge));
 
   Widget _buildImportTab() => Center(
-        child: ElevatedButton.icon(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            backgroundColor: pink,
-            foregroundColor: Colors.white,
-          ),
-          icon: const Icon(Icons.file_upload),
-          label: const Text('Importar MP3'),
-        ),
-      );
+    child: ElevatedButton.icon(
+      onPressed: () {},
+      style: ElevatedButton.styleFrom(
+        backgroundColor: pink,
+        foregroundColor: Colors.white,
+      ),
+      icon: const Icon(Icons.file_upload),
+      label: const Text('Importar MP3'),
+    ),
+  );
 }

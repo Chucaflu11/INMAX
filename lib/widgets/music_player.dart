@@ -41,15 +41,29 @@ class MusicPlayer extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 child: AspectRatio(
                   aspectRatio: 1,
-                  child: (musicProvider.currentSong != null && musicProvider.currentSong!.albumImage.isNotEmpty)
+                  child: (musicProvider.currentSong != null)
+                      ? musicProvider.currentSong!.imageBytes != null
+                      ? Image.memory(
+                    musicProvider.currentSong!.imageBytes!,
+                    fit: BoxFit.cover,
+                  )
+                      : musicProvider.currentSong!.albumImage.isNotEmpty
                       ? Image.network(
-                          musicProvider.currentSong!.albumImage,
-                          fit: BoxFit.cover,
-                        )
+                    musicProvider.currentSong!.albumImage,
+                    fit: BoxFit.cover,
+                    errorBuilder: (ctx, error, _) => Image.asset(
+                      'assets/taxmanMockup.jpg',
+                      fit: BoxFit.cover,
+                    ),
+                  )
                       : Image.asset(
-                          'assets/taxmanMockup.jpg',
-                          fit: BoxFit.cover,
-                        ),
+                    'assets/taxmanMockup.jpg',
+                    fit: BoxFit.cover,
+                  )
+                      : Image.asset(
+                    'assets/taxmanMockup.jpg',
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

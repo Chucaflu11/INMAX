@@ -1,6 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spotify_sdk/spotify_sdk.dart';
-import 'package:spotify_sdk/models/connection_status.dart';
 
 class SpotifyPlayer {
   static const String clientId = '301d702be72a4154b26818f6c79cfdae';
