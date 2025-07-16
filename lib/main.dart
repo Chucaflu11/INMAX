@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'services/auth_service.dart';
+import 'generated/l10n.dart';
+import 'locale_provider.dart';
 
 import 'providers/music_provider.dart';
 import 'providers/theme_provider.dart';
@@ -23,6 +26,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => MusicProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()), // soporte de idioma
       ],
       child: INMAXApp(isLoggedIn: isLoggedIn),
     ),
@@ -37,12 +41,21 @@ class INMAXApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Consumer<MusicProvider>(
       builder: (context, musicProvider, child) {
         return MaterialApp(
           title: 'INMAX',
           debugShowCheckedModeBanner: false,
+          locale: localeProvider.locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           themeMode: themeProvider.currentTheme,
           theme: ThemeData.light().copyWith(
             appBarTheme: const AppBarTheme(

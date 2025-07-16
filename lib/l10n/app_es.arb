@@ -1,0 +1,16 @@
+{
+  "@@locale": "es",
+  "settings": "Ajustes",
+  "logout": "Cerrar sesión",
+  "language": "Idioma",
+  "darkMode": "Modo oscuro",
+  "profile": "Perfil",
+  "changePassword": "Cambiar contraseña",
+  "pushNotifications": "Notificaciones push",
+  "terms": "Términos y condiciones",
+  "privacyPolicy": "Política de privacidad",
+  "faq": "Preguntas frecuentes (FAQ)",
+  "contact": "Contacto",
+  "version": "Versión",
+  "selectLanguage": "Seleccionar idioma"
+}

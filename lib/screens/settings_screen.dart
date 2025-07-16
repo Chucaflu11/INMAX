@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/theme_provider.dart';
 import '../services/auth_service.dart';
+import '../locale_provider.dart';
+import 'package:inmax/generated/l10n.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -40,7 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirm = await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Cerrar sesión"),
+        title: Text(AppLocalizations.of(context)!.logout),
         content: const Text("¿Estás seguro que quieres cerrar sesión?"),
         actions: [
           TextButton(
@@ -49,7 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("Cerrar sesión"),
+            child: Text(AppLocalizations.of(context)!.logout),
           ),
         ],
       ),
@@ -66,17 +68,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Seleccionar idioma"),
+        title: Text(AppLocalizations.of(context)!.selectLanguage),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               title: const Text("Español"),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Provider.of<LocaleProvider>(context, listen: false)
+                    .setLocale(const Locale('es'));
+                Navigator.pop(context);
+              },
             ),
             ListTile(
-              title: const Text("Inglés"),
-              onTap: () => Navigator.pop(context),
+              title: const Text("English"),
+              onTap: () {
+                Provider.of<LocaleProvider>(context, listen: false)
+                    .setLocale(const Locale('en'));
+                Navigator.pop(context);
+              },
             ),
           ],
         ),
@@ -103,9 +113,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final s = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ajustes'),
+        title: Text(s.settings),
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
       ),
@@ -113,22 +125,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         children: [
-          _buildSectionTitle('Cuenta', theme),
+          _buildSectionTitle(s.profile, theme),
           _buildSettingsTile(
             icon: Icons.person,
-            title: 'Perfil',
+            title: s.profile,
             onTap: () => Navigator.pushNamed(context, '/perfil'),
             theme: theme,
           ),
           _buildSettingsTile(
             icon: Icons.lock_outline,
-            title: 'Cambiar contraseña',
+            title: s.changePassword,
             onTap: () => Navigator.pushNamed(context, '/cambiar-contrasena'),
             theme: theme,
           ),
           _buildSettingsTile(
             icon: Icons.logout,
-            title: 'Cerrar sesión',
+            title: s.logout,
             onTap: _logout,
             theme: theme,
           ),
@@ -136,7 +148,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionTitle('Preferencias', theme),
           _buildSettingsTile(
             icon: Icons.brightness_6,
-            title: 'Modo oscuro',
+            title: s.darkMode,
             trailing: Consumer<ThemeProvider>(
               builder: (context, themeProvider, _) {
                 return Switch(
@@ -149,15 +161,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _buildSettingsTile(
             icon: Icons.language,
-            title: 'Idioma',
+            title: s.language,
             onTap: _showLanguageDialog,
             theme: theme,
           ),
           const SizedBox(height: 20),
-          _buildSectionTitle('Notificaciones', theme),
+          _buildSectionTitle(s.pushNotifications, theme),
           _buildSettingsTile(
             icon: Icons.notifications_active_outlined,
-            title: 'Notificaciones push',
+            title: s.pushNotifications,
             trailing: Switch(
               value: pushNotifications,
               onChanged: _togglePushNotifications,
@@ -168,35 +180,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionTitle('Privacidad y seguridad', theme),
           _buildSettingsTile(
             icon: Icons.shield_outlined,
-            title: 'Términos y condiciones',
-            onTap: () => _showInfoDialog('Términos y condiciones', 'Aquí irán los términos...'),
+            title: s.terms,
+            onTap: () => _showInfoDialog(s.terms, 'Aquí irán los términos...'),
             theme: theme,
           ),
           _buildSettingsTile(
             icon: Icons.policy_outlined,
-            title: 'Política de privacidad',
-            onTap: () => _showInfoDialog('Política de privacidad', 'Aquí irá la política...'),
+            title: s.privacyPolicy,
+            onTap: () => _showInfoDialog(s.privacyPolicy, 'Aquí irá la política...'),
             theme: theme,
           ),
           const SizedBox(height: 20),
           _buildSectionTitle('Soporte', theme),
           _buildSettingsTile(
             icon: Icons.help_outline,
-            title: 'Preguntas frecuentes (FAQ)',
+            title: s.faq,
             onTap: () => Navigator.pushNamed(context, '/faq'),
             theme: theme,
           ),
           _buildSettingsTile(
             icon: Icons.mail_outline,
-            title: 'Contacto',
-            onTap: () => _showInfoDialog('Contacto', 'Correo: soporte@tuapp.com'),
+            title: s.contact,
+            onTap: () => _showInfoDialog(s.contact, 'Correo: soporte@tuapp.com'),
             theme: theme,
           ),
           const SizedBox(height: 20),
           _buildSectionTitle('Acerca de la app', theme),
           _buildSettingsTile(
             icon: Icons.info_outline,
-            title: 'Versión',
+            title: s.version,
             trailing: const Text('v1.0.0'),
             theme: theme,
           ),

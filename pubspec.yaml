@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter  
   logger: ^2.0.2
   shared_preferences: ^2.2.2
   provider: ^6.1.5
@@ -82,7 +84,7 @@ flutter_native_splash:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  generate: true
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
