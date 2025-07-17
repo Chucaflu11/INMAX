@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:spotify_sdk/spotify_sdk.dart';
 import 'package:spotify_sdk/models/track.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../models/song.dart';
 import 'spotify_player.dart';
 import 'dart:typed_data';
@@ -168,6 +171,23 @@ class MusicProvider with ChangeNotifier {
       print('Error al obtener imagen: $e');
       return null;
     }
+  }
+
+  Future<List<dynamic>> fetchUserPlaylistsFromWebApi(String token) async {
+    final url = Uri.parse("https://api.spotify.com/v1/me/playlists");
+    final response = await http.get(url, headers: {"Authorization": "Bearer " + token});
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data["items"];
+    } else {
+      throw Exception("Error al obtener playlists: ${response.statusCode}");
+    }
+  }
+
+  // lib/providers/music_provider.dart
+  Future<String?> getSpotifyAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(SpotifyPlayer.accessTokenKey);
   }
 
   // Toggle modes
