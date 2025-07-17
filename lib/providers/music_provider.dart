@@ -173,6 +173,17 @@ class MusicProvider with ChangeNotifier {
     }
   }
 
+  Future<List<dynamic>> fetchPlaylistTracksFromWebApi(String token, String playlistId) async {
+    final url = Uri.parse("https://api.spotify.com/v1/playlists/$playlistId/tracks");
+    final response = await http.get(url, headers: {"Authorization": "Bearer $token"});
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data["items"];
+    } else {
+      throw Exception("Error al obtener canciones de la playlist: ${response.statusCode}");
+    }
+  }
+
   Future<List<dynamic>> fetchUserPlaylistsFromWebApi(String token) async {
     final url = Uri.parse("https://api.spotify.com/v1/me/playlists");
     final response = await http.get(url, headers: {"Authorization": "Bearer " + token});

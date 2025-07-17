@@ -11,38 +11,24 @@ class MusicScreen extends StatefulWidget {
   State<MusicScreen> createState() => _MusicScreenState();
 }
 
-class _MusicScreenState extends State<MusicScreen> {
+class _MusicScreenState extends State<MusicScreen>
+    with TickerProviderStateMixin {
   final Color pink = const Color(0xFFFF385D);
-
-  final List<Song> songs = [
-    Song(
-      name: 'Imagine',
-      artistName: 'John Lennon',
-      albumImage: '',
-      spotifyUri: 'spotify:track:7pKfPomDEeI4TPT6EOYjn9',
-    ),
-    Song(
-      name: 'Bohemian Rhapsody',
-      artistName: 'Queen',
-      albumImage: '',
-      spotifyUri: 'spotify:track:7tFiyTwD0nx5a1eklYtX2J',
-    ),
-    Song(
-      name: 'Billie Jean',
-      artistName: 'Michael Jackson',
-      albumImage: '',
-      spotifyUri: 'spotify:track:5ChkMS8OtdzJeqyybCc9R5',
-    ),
-  ];
 
   String? _spotifyToken;
   List<dynamic> _playlists = [];
   bool _isLoadingPlaylists = false;
   String? _playlistsError;
 
+  List<dynamic> _selectedPlaylistTracks = [];
+  String? _selectedPlaylistName;
+
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     Future.microtask(
       () => Provider.of<MusicProvider>(
         context,
@@ -89,19 +75,19 @@ class _MusicScreenState extends State<MusicScreen> {
     }
   }
 
-  // dart
   Future<void> _refreshPlaylists() async {
     final musicProvider = Provider.of<MusicProvider>(context, listen: false);
     String? token = await musicProvider.getSpotifyAccessToken();
 
     if (token == null || token.isEmpty) {
-      // Si no hay token, intenta reautenticar
       await musicProvider.initializeSpotify();
       token = await musicProvider.getSpotifyAccessToken();
     }
 
     try {
-      final playlists = await musicProvider.fetchUserPlaylistsFromWebApi(token!);
+      final playlists = await musicProvider.fetchUserPlaylistsFromWebApi(
+        token!,
+      );
       setState(() {
         _spotifyToken = token;
         _playlists = playlists;
@@ -109,12 +95,13 @@ class _MusicScreenState extends State<MusicScreen> {
         _isLoadingPlaylists = false;
       });
     } catch (e) {
-      // Si falla, intenta reautenticar y volver a cargar
       await musicProvider.initializeSpotify();
       token = await musicProvider.getSpotifyAccessToken();
       if (token != null && token.isNotEmpty) {
         try {
-          final playlists = await musicProvider.fetchUserPlaylistsFromWebApi(token);
+          final playlists = await musicProvider.fetchUserPlaylistsFromWebApi(
+            token,
+          );
           setState(() {
             _spotifyToken = token;
             _playlists = playlists;
@@ -136,6 +123,33 @@ class _MusicScreenState extends State<MusicScreen> {
     }
   }
 
+  Future<void> _selectPlaylist(Map playlist) async {
+    setState(() {
+      _isLoadingPlaylists = true;
+      _selectedPlaylistTracks = [];
+      _selectedPlaylistName = playlist['name'];
+    });
+    try {
+      final musicProvider = Provider.of<MusicProvider>(context, listen: false);
+      final token = await musicProvider.getSpotifyAccessToken();
+      final playlistId = playlist['id'];
+      final tracks = await musicProvider.fetchPlaylistTracksFromWebApi(
+        token!,
+        playlistId,
+      );
+      setState(() {
+        _selectedPlaylistTracks = tracks;
+        _isLoadingPlaylists = false;
+      });
+      _tabController.animateTo(0); // Ir a la pestaña de música
+    } catch (e) {
+      setState(() {
+        _playlistsError = 'Error al cargar canciones de la playlist: $e';
+        _isLoadingPlaylists = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -147,25 +161,23 @@ class _MusicScreenState extends State<MusicScreen> {
           preferredSize: const Size.fromHeight(60),
           child: SafeArea(
             child: TabBar(
+              controller: _tabController,
               labelColor: pink,
               unselectedLabelColor: theme.textTheme.bodyMedium?.color
                   ?.withOpacity(0.6),
               indicatorColor: pink,
               tabs: const [
                 Tab(text: 'Música'),
-                Tab(text: 'Álbumes'),
                 Tab(text: 'Playlists'),
-                Tab(text: 'Importar'),
               ],
             ),
           ),
         ),
         body: TabBarView(
+          controller: _tabController,
           children: [
             _buildMusicTab(theme),
-            _buildAlbumsTab(theme),
             _buildPlaylistsTab(theme),
-            _buildImportTab(),
           ],
         ),
       ),
@@ -173,18 +185,37 @@ class _MusicScreenState extends State<MusicScreen> {
   }
 
   Widget _buildMusicTab(ThemeData theme) {
+    if (_selectedPlaylistTracks.isEmpty) {
+      return Center(
+        child: Text('Elegir playlist', style: theme.textTheme.bodyLarge),
+      );
+    }
     return Consumer<MusicProvider>(
       builder: (context, musicProvider, _) {
         return ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: songs.length,
+          itemCount: _selectedPlaylistTracks.length,
           itemBuilder: (_, i) {
-            final song = songs[i];
+            final track = _selectedPlaylistTracks[i]['track'];
             return ListTile(
-              leading: Icon(Icons.music_note, color: theme.iconTheme.color),
-              title: Text(song.name, style: theme.textTheme.bodyLarge),
+              leading:
+                  track['album']['images'] != null &&
+                      track['album']['images'].isNotEmpty
+                  ? Image.network(
+                      track['album']['images'][0]['url'],
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    )
+                  : const Icon(Icons.music_note),
+              title: Text(
+                track['name'] ?? '',
+                style: theme.textTheme.bodyLarge,
+              ),
               subtitle: Text(
-                song.artistName,
+                track['artists'] != null && track['artists'].isNotEmpty
+                    ? track['artists'][0]['name']
+                    : '',
                 style: theme.textTheme.bodyMedium,
               ),
               trailing: Icon(
@@ -192,6 +223,19 @@ class _MusicScreenState extends State<MusicScreen> {
                 color: theme.iconTheme.color?.withOpacity(0.5),
               ),
               onTap: () {
+                final song = Song(
+                  name: track['name'] ?? '',
+                  artistName:
+                      track['artists'] != null && track['artists'].isNotEmpty
+                      ? track['artists'][0]['name']
+                      : '',
+                  albumImage:
+                      track['album']['images'] != null &&
+                          track['album']['images'].isNotEmpty
+                      ? track['album']['images'][0]['url']
+                      : '',
+                  spotifyUri: track['uri'] ?? '',
+                );
                 musicProvider.playSong(song);
               },
             );
@@ -200,9 +244,6 @@ class _MusicScreenState extends State<MusicScreen> {
       },
     );
   }
-
-  Widget _buildAlbumsTab(ThemeData theme) =>
-      Center(child: Text('Álbumes', style: theme.textTheme.bodyLarge));
 
   Widget _buildPlaylistsTab(ThemeData theme) {
     return RefreshIndicator(
@@ -264,24 +305,10 @@ class _MusicScreenState extends State<MusicScreen> {
                     playlist['description'] ?? '',
                     style: theme.textTheme.bodyMedium,
                   ),
-                  onTap: () {
-                    // Acción al tocar la playlist
-                  },
+                  onTap: () => _selectPlaylist(playlist),
                 );
               },
             ),
     );
   }
-
-  Widget _buildImportTab() => Center(
-    child: ElevatedButton.icon(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: pink,
-        foregroundColor: Colors.white,
-      ),
-      icon: const Icon(Icons.file_upload),
-      label: const Text('Importar MP3'),
-    ),
-  );
 }
