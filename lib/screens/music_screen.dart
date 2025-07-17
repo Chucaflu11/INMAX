@@ -179,10 +179,7 @@ class _MusicScreenState extends State<MusicScreen>
         ),
         body: TabBarView(
           controller: _tabController,
-          children: [
-            _buildMusicTab(theme),
-            _buildPlaylistsTab(theme),
-          ],
+          children: [_buildMusicTab(theme), _buildPlaylistsTab(theme)],
         ),
       ),
     );
@@ -196,8 +193,11 @@ class _MusicScreenState extends State<MusicScreen>
     }
     return Consumer<MusicProvider>(
       builder: (context, musicProvider, _) {
+        // Calcular padding inferior basado en si hay canción reproduciéndose
+        final bottomPadding = musicProvider.currentSong != null ? 80.0 : 16.0;
+
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
           itemCount: _selectedPlaylistTracks.length,
           itemBuilder: (_, i) {
             final track = _selectedPlaylistTracks[i]['track'];

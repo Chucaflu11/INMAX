@@ -176,7 +176,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                 textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(width: 48), // Espaciado para centrar el título
+            const SizedBox(width: 48),
           ],
         ),
         const SizedBox(height: 16),
@@ -186,8 +186,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
             itemCount: musicProvider.currentPlaylistTracks.length,
             itemBuilder: (context, index) {
               final track = musicProvider.currentPlaylistTracks[index]['track'];
-              final isCurrentSong =
-                  track['uri'] == musicProvider.currentSong?.spotifyUri;
+              final isCurrentSong = index == musicProvider.currentTrackIndex;
 
               return ListTile(
                 leading:
@@ -225,8 +224,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       )
                     : null,
                 onTap: () {
-                  // Aquí puedes implementar la lógica para saltar a una canción específica
-                  // Por ahora, reproduce la canción seleccionada
                   final song = Song(
                     name: track['name'] ?? '',
                     artistName:
