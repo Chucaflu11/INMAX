@@ -15,6 +15,10 @@ class _FeedScreenState extends State<FeedScreen> {
   List<dynamic> posts = [];
   String? errorMessage;
   bool isLoading = false;
+  bool isLoadingMore = false;
+  bool hasMoreData = true;
+  String? cursor;
+  late ScrollController _scrollController;
 
   String? get authToken => AuthService.session?.accessJwt;
   String? get userDid => AuthService.session?.did;  
@@ -23,7 +27,40 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll); // Escuchar eventos de scroll
     fetchWhatsHotFeed();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose(); // Limpiar el controlador
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) { // 200px antes del final
+      if (!isLoadingMore && hasMoreData) {
+        _loadMorePosts();
+      }
+    }
+  }
+
+  Future<void> _loadMorePosts() async {
+    if (isLoadingMore || !hasMoreData) return;
+
+    setState(() {
+      isLoadingMore = true;
+    });
+
+    try {
+      await fetchWhatsHotFeed(loadMore: true);
+    } finally {
+      setState(() {
+        isLoadingMore = false;
+      });
+    }
   }
 
   bool isTablet(BuildContext context) {
@@ -79,21 +116,31 @@ class _FeedScreenState extends State<FeedScreen> {
     }
   }
 
-  Future<void> fetchWhatsHotFeed() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-      posts = [];
-    });
+  Future<void> fetchWhatsHotFeed({bool loadMore = false}) async {
+    if (!loadMore) {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+        posts = [];
+        cursor = null;
+        hasMoreData = true;
+      });
+    }
 
     try {
+      final queryParams = {
+        'feed': 'at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.generator/whats-hot',
+        'limit': '30',
+      };
+
+      // Agregar cursor si existe (para paginación)
+      if (cursor != null && loadMore) {
+        queryParams['cursor'] = cursor!;
+      }
+
       final response = await http.get(
         Uri.parse('https://bsky.social/xrpc/app.bsky.feed.getFeed').replace(
-          queryParameters: {
-            'feed':
-                'at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.generator/whats-hot',
-            'limit': '30',
-          },
+          queryParameters: queryParams,
         ),
         headers: {
           'Accept': 'application/json',
@@ -104,26 +151,37 @@ class _FeedScreenState extends State<FeedScreen> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        await processWhatsHotData(data);
+        await processWhatsHotData(data, loadMore: loadMore);
 
         setState(() {
-          isLoading = false;
-          if (posts.isEmpty) {
-            errorMessage =
-                'No se encontraron posts con imágenes en What\'s Hot';
+          if (!loadMore) isLoading = false;
+          if (posts.isEmpty && !loadMore) {
+            errorMessage = 'No se encontraron posts con imágenes en What\'s Hot';
           }
         });
       } else {
-        await fetchFallbackFeeds();
+        if (!loadMore) {
+          await fetchFallbackFeeds();
+        }
       }
     } catch (e) {
-      await fetchFallbackFeeds();
+      if (!loadMore) {
+        await fetchFallbackFeeds();
+      }
     }
   }
 
-  Future<void> processWhatsHotData(Map<String, dynamic> data) async {
+  Future<void> processWhatsHotData(Map<String, dynamic> data, {bool loadMore = false}) async {
     if (data['feed'] != null) {
       final List<dynamic> feedPosts = data['feed'];
+
+      // Actualizar cursor para siguiente página
+      cursor = data['cursor'] as String?;
+
+      // Si no hay cursor, no hay más datos
+      if (cursor == null || cursor!.isEmpty) {
+        hasMoreData = false;
+      }
 
       final postsWithImages = feedPosts.where((feedItem) {
         final post = feedItem['post'];
@@ -145,7 +203,7 @@ class _FeedScreenState extends State<FeedScreen> {
             if (mediaType == 'app.bsky.embed.images#view') {
               hasImages =
                   media['images'] != null &&
-                  (media['images'] as List).isNotEmpty;
+                      (media['images'] as List).isNotEmpty;
             }
           }
         }
@@ -154,7 +212,11 @@ class _FeedScreenState extends State<FeedScreen> {
 
       if (postsWithImages.isNotEmpty) {
         setState(() {
-          posts.addAll(postsWithImages);
+          if (loadMore) {
+            posts.addAll(postsWithImages); // Agregar a los existentes
+          } else {
+            posts = postsWithImages; // Reemplazar
+          }
         });
       }
     }
@@ -628,10 +690,11 @@ class _FeedScreenState extends State<FeedScreen> {
           child: posts.isEmpty && !isLoading
               ? _buildEmptyState()
               : RefreshIndicator(
-                  onRefresh: fetchWhatsHotFeed,
+                  onRefresh: () => fetchWhatsHotFeed(), // Reset completo
                   child: Padding(
                     padding: getResponsivePadding(context),
                     child: GridView.builder(
+                      controller: _scrollController, // Agregar controlador
                       physics: const AlwaysScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: getCrossAxisCount(context),
@@ -639,8 +702,13 @@ class _FeedScreenState extends State<FeedScreen> {
                         mainAxisSpacing: getResponsiveSpacing(context),
                         childAspectRatio: getChildAspectRatio(context),
                       ),
-                      itemCount: posts.length,
+                      itemCount: posts.length + (isLoadingMore ? 1 : 0), // +1 para indicador
                       itemBuilder: (context, index) {
+                        // Mostrar indicador de carga al final
+                        if (index == posts.length && isLoadingMore) {
+                          return _buildLoadMoreIndicator();
+                        }
+
                         final post = posts[index]['post'];
                         final author = post['author'];
                         final embed = post['embed'];
@@ -662,6 +730,29 @@ class _FeedScreenState extends State<FeedScreen> {
                 ),
         ),
       ],
+    );
+  }
+  Widget _buildLoadMoreIndicator() {
+    return Container(
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Cargando más...',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
