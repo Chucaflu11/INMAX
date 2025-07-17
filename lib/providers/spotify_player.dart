@@ -4,18 +4,18 @@ import 'package:spotify_sdk/spotify_sdk.dart';
 class SpotifyPlayer {
   static const String clientId = '301d702be72a4154b26818f6c79cfdae';
   static const String redirectUri = 'com.example.inmax://callback';
-  static const String _accessTokenKey = 'spotify_access_token'; //placeholder
+  static const String accessTokenKey = 'spotify_access_token'; //placeholder
 
   // Guarda el token de acceso
   Future<void> _saveAccessToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_accessTokenKey, token);
+    await prefs.setString(accessTokenKey, token);
   }
 
   // Recupera el token de acceso
   Future<String?> _getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_accessTokenKey);
+    return prefs.getString(accessTokenKey);
   }
 
   Future<bool> connect() async {
@@ -51,7 +51,7 @@ class SpotifyPlayer {
       final accessToken = await SpotifySdk.getAccessToken(
         clientId: clientId,
         redirectUrl: redirectUri,
-        scope: 'app-remote-control,user-modify-playback-state',
+        scope: 'app-remote-control,user-modify-playback-state,playlist-read-private',
       );
 
       if (accessToken.isNotEmpty) {
