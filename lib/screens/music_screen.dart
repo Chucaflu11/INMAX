@@ -141,6 +141,10 @@ class _MusicScreenState extends State<MusicScreen>
         _selectedPlaylistTracks = tracks;
         _isLoadingPlaylists = false;
       });
+
+      // Pasar la playlist al provider
+      musicProvider.setCurrentPlaylist(tracks, playlist['name']);
+
       _tabController.animateTo(0); // Ir a la pestaña de música
     } catch (e) {
       setState(() {

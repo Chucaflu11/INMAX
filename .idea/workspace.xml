@@ -13,6 +13,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/providers/music_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/music_provider.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/music_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/music_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/widgets/music_player.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/music_player.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

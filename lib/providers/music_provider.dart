@@ -21,6 +21,9 @@ class MusicProvider with ChangeNotifier {
   int _currentPosition = 0;
   int _duration = 0;
 
+  List<dynamic> _currentPlaylistTracks = [];
+  String? _currentPlaylistName;
+
   // Getters
   Song? get currentSong => _currentSong;
   bool get isPlaying => _isPlaying;
@@ -32,6 +35,9 @@ class MusicProvider with ChangeNotifier {
   int get currentPosition => _currentPosition;
   int get duration => _duration;
   double get progress => _duration > 0 ? _currentPosition / _duration : 0.0;
+  List<dynamic> get currentPlaylistTracks => _currentPlaylistTracks;
+  String? get currentPlaylistName => _currentPlaylistName;
+
 
   // Inicializar conexión con Spotify
   Future<void> initializeSpotify() async {
@@ -76,6 +82,12 @@ class MusicProvider with ChangeNotifier {
     } catch (e) {
       print('Error al reproducir: $e');
     }
+  }
+
+  void setCurrentPlaylist(List<dynamic> tracks, String? playlistName) {
+    _currentPlaylistTracks = tracks;
+    _currentPlaylistName = playlistName;
+    notifyListeners();
   }
 
   // Toggle play/pause
