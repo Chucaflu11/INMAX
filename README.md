@@ -2,15 +2,38 @@
 
 A new Flutter project.
 
-## Getting Started
+# Running the API Documentation
 
-This project is a starting point for a Flutter application.
+To serve the API documentation locally, follow these simple steps:
 
-A few resources to get you started if this is your first Flutter project:
+## 1. Install `dhttpd`
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+First, install the `dhttpd` web server globally using Dart:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+dart pub global activate dhttpd
+```
+
+## 2. Serve the Documentation
+
+Run the following command to serve the documentation folder:
+
+```bash
+dart pub global run dhttpd --path doc/api
+```
+
+This will start a local web server.
+
+## 3. Access the Documentation
+
+After starting the server, open your browser and go to:
+
+```
+http://localhost:<PORT>
+```
+
+Replace `<PORT>` with the port number displayed in the terminal after running the command (usually `8080` by default).
+
+---
+
+Now your API documentation should be accessible locally in your browser.
