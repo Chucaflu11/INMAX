@@ -1,341 +1,241 @@
+// ads_screen.dart
 import 'package:flutter/material.dart';
-import '../models/ad_model.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import '../services/auth_service.dart';
 
-
-import 'package:file_picker/file_picker.dart';
-import 'dart:io';
-
-
-class AdsScreen extends StatelessWidget {
+class AdsScreen extends StatefulWidget {
   const AdsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Your Ads')),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: AdsContent(),
-      ),
-    );
-  }
+  State<AdsScreen> createState() => _AdsScreenState();
 }
 
-class AdsContent extends StatefulWidget {
-  const AdsContent({super.key});
+class _AdsScreenState extends State<AdsScreen> {
+  Map<String, bool> selectedAds = {
+    'monster': false,
+    'vans': false,
+    'converse': false,
+    'redbull': false,
+    'mcdonalds': false,
+    'starbucks': false,
+    'adidas': false,
+    'kfc': false,
+    'cocacola': false,
+    'nike': false,
+  };
+
+  String? selectedPostUri;
+  List<Map<String, dynamic>> userPosts = [];
+  bool isLoading = false;
+  String? error;
+
+  String? get authToken => AuthService.session?.accessJwt;
+  String? get userHandle => AuthService.session?.handle;
 
   @override
-  State<AdsContent> createState() => _AdsContentState();
-}
-
-class _AdsContentState extends State<AdsContent> {
-  final List<AdModel> _ads = [
-    AdModel(title: 'ExampleAd', imageUrl: '../assets/taxmanMockup.png', status: 'Active', impressions: 270),
-    AdModel(title: 'ExampleAd2', imageUrl: '../assets/taxmanMockup.png', status: 'Active', impressions: 263)
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final int totalAds = _ads.length;
-    final int totalImpressions = _ads.fold(0, (sum, ad) => sum + ad.impressions);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSummary(totalAds, totalImpressions),
-        const SizedBox(height: 16),
-        const Text("Your Ads", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        Align(
-          alignment: Alignment.centerRight,
-          child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.pinkAccent,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            icon: const Icon(Icons.add),
-            label: const Text("Create Ad"),
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (_) => CreateAdModal(
-                  onAdCreated: (ad) {
-                    setState(() {
-                      _ads.add(ad);
-                    });
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        const Text("Manage your ad content and track performance."),
-        const SizedBox(height: 16),
-        Expanded(child: _buildAdList()),
-      ],
-    );
+  void initState() {
+    super.initState();
+    fetchUserPosts();
   }
 
-  Widget _buildSummary(int ads, int impressions) {
-    return Row(
-      children: [
-        _buildStatCard("Total Ads", ads.toString()),
-        const SizedBox(width: 16),
-        _buildStatCard("Total Impressions", impressions.toString()),
-      ],
+  Future<void> fetchUserPosts() async {
+    setState(() {
+      isLoading = true;
+      error = null;
+    });
+
+    final uri = Uri.parse(
+      'https://bsky.social/xrpc/app.bsky.feed.getAuthorFeed?actor=$userHandle&limit=20',
     );
-  }
 
-  Widget _buildStatCard(String label, String value) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 4),
-            Text(label),
-          ],
-        ),
-      ),
-    );
-  }
-
-Widget _buildAdList() {
-  return ListView.builder(
-    itemCount: _ads.length,
-    itemBuilder: (context, index) {
-      final ad = _ads[index];
-
-      Widget leadingImage;
-
-      if (Uri.tryParse(ad.imageUrl)?.hasAbsolutePath == true &&
-          (ad.imageUrl.endsWith('.jpg') ||
-              ad.imageUrl.endsWith('.jpeg') ||
-              ad.imageUrl.endsWith('.png') ||
-              ad.imageUrl.endsWith('.webp'))) {
-        leadingImage = Image.network(
-          ad.imageUrl,
-          width: 50,
-          height: 70,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Image.asset('assets/placeholder.jpg',
-                width: 50, height: 70, fit: BoxFit.cover);
-          },
-        );
-      } else if (File(ad.imageUrl).existsSync()) {
-        leadingImage = Image.file(File(ad.imageUrl),
-            width: 50, height: 70, fit: BoxFit.cover);
-      } else {
-        leadingImage = Image.asset('assets/placeholder.jpg',
-            width: 50, height: 70, fit: BoxFit.cover);
-      }
-
-      return Card(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: ListTile(
-          leading: leadingImage,
-          title: Text(ad.title),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Status: ${ad.status}"),
-              Text("Impressions: ${ad.impressions}"),
-            ],
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(icon: const Icon(Icons.pause), onPressed: () {/* TODO: toggle */}),
-              IconButton(icon: const Icon(Icons.edit), onPressed: () {/* TODO: edit */}),
-              IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Delete Ad"),
-                      content: const Text("Are you sure you want to delete this ad?"),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Cancel"),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _ads.removeAt(index);
-                            });
-                            Navigator.pop(context);
-                          },
-                          child: const Text("Delete", style: TextStyle(color: Colors.red)),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
+    try {
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $authToken',
+        },
       );
-    },
-  );
-}
-}
 
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<Map<String, dynamic>> fetchedPosts = [];
 
-class CreateAdModal extends StatefulWidget {
-  final Function(AdModel) onAdCreated;
+        for (var item in data['feed']) {
+          final post = item['post'];
+          final embed = post['embed'];
+          String imageUrl = '';
 
-  const CreateAdModal({super.key, required this.onAdCreated});
+          if (embed != null) {
+            final type = embed['\$type'];
+            if (type == 'app.bsky.embed.images#view') {
+              imageUrl = embed['images'][0]['thumb'];
+            } else if (type == 'app.bsky.embed.recordWithMedia#view') {
+              final media = embed['media'];
+              if (media['\$type'] == 'app.bsky.embed.images#view') {
+                imageUrl = media['images'][0]['thumb'];
+              }
+            }
+          }
 
-  @override
-  State<CreateAdModal> createState() => _CreateAdModalState();
-}
+          fetchedPosts.add({
+            'uri': post['uri'],
+            'text': post['record']['text'] ?? '',
+            'image': imageUrl,
+          });
+        }
 
-class _CreateAdModalState extends State<CreateAdModal> {
-  final TextEditingController _titleController = TextEditingController();
-  bool _isUrlUpload = true;
-  String _imageUrl = '';
-  PlatformFile? _pickedFile;
-
-  void _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.image);
-    if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          userPosts = fetchedPosts;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          error = 'No se pudieron obtener las publicaciones';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
       setState(() {
-        _pickedFile = result.files.first;
-        _imageUrl = ''; // Clear any existing URL input
-        _isUrlUpload = false;
+        error = 'Error al obtener publicaciones: $e';
+        isLoading = false;
       });
     }
   }
 
-  void _submit() {
-    String title = _titleController.text.trim();
-    if (title.isEmpty || (_isUrlUpload && _imageUrl.isEmpty && _pickedFile == null)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please provide a title and an image.')),
-      );
-      return;
-    }
-
-    String imagePath = _isUrlUpload
-        ? _imageUrl
-        : _pickedFile != null
-            ? _pickedFile!.path!
-            : '';
-
-    final newAd = AdModel(
-      title: title,
-      imageUrl: imagePath,
-      status: 'Active',
-      impressions: 0,
+  Future<void> saveAdSettings() async {
+    if (selectedPostUri == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(selectedPostUri!, jsonEncode(selectedAds));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Configuración guardada localmente.')),
     );
+  }
 
-    widget.onAdCreated(newAd);
-    Navigator.pop(context);
+  Future<void> loadAdSettings(String uri) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(uri);
+    if (jsonString != null) {
+      final Map<String, dynamic> saved = jsonDecode(jsonString);
+      setState(() {
+        selectedAds = {
+          for (var key in selectedAds.keys)
+            key: saved[key]?.toString() == 'true'
+        };
+      });
+    } else {
+      setState(() {
+        selectedAds = {
+          for (var key in selectedAds.keys) key: false
+        };
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isWide = MediaQuery.of(context).size.width > 500;
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        top: 24,
-        left: 16,
-        right: 16,
-      ),
-      child: SingleChildScrollView(
-        child: FractionallySizedBox(
-          widthFactor: isWide ? 0.6 : 1.0,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("Create New Ad", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: "Title",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ToggleButtons(
-                isSelected: [_isUrlUpload, !_isUrlUpload],
-                onPressed: (index) {
-                  setState(() {
-                    _isUrlUpload = index == 0;
-                    _pickedFile = null;
-                  });
-                },
-                children: const [
-                  Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text("URL Upload")),
-                  Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text("File Upload")),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _isUrlUpload
-                  ? TextField(
-                      onChanged: (val) => setState(() => _imageUrl = val),
-                      decoration: const InputDecoration(
-                        labelText: "Image URL",
-                        border: OutlineInputBorder(),
-                      ),
-                    )
-                  : GestureDetector(
-                      onTap: _pickFile,
-                      child: Container(
-                        height: 150,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.grey[100],
-                        ),
-                        alignment: Alignment.center,
-                        child: _pickedFile == null
-                            ? const Text("Tap to pick image file")
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.image, color: Colors.green),
-                                  const SizedBox(height: 8),
-                                  Text(_pickedFile!.name),
-                                ],
+    return Scaffold(
+      appBar: AppBar(title: const Text('Gestión de Anuncios')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Selecciona una publicación para configurar sus anuncios:'),
+                  const SizedBox(height: 12),
+                  DropdownButton<String>(
+                    isExpanded: true,
+                    value: selectedPostUri,
+                    hint: const Text('Seleccionar publicación'),
+                    items: userPosts.map<DropdownMenuItem<String>>((post) {
+                      return DropdownMenuItem<String>(
+                        value: post['uri'] as String,
+                        child: Row(
+                          children: [
+                            if (post['image'] != '')
+                              Image.network(post['image'], width: 32, height: 32, fit: BoxFit.cover),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                post['text'].isEmpty ? '[Sin texto]' : post['text'],
+                                overflow: TextOverflow.ellipsis,
                               ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        selectedPostUri = val;
+                      });
+                      loadAdSettings(val!);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  if (selectedPostUri != null)
+                    Expanded(
+                      child: GridView.count(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        children: selectedAds.keys.map((brand) {
+                          return Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 8),
+                                Text(brand, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 8),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                    child: Image.asset(
+                                      'assets/ads/$brand.jpg',
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text('Permitir'),
+                                      Switch(
+                                        value: selectedAds[brand]!,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedAds[brand] = value;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pinkAccent,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text("Create Ad", style: TextStyle(fontSize: 16)),
-                ),
+                  const SizedBox(height: 12),
+                  if (selectedPostUri != null)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: saveAdSettings,
+                        child: const Text('Guardar configuración'),
+                      ),
+                    )
+                ],
               ),
-              const SizedBox(height: 12),
-            ],
-          ),
-        ),
       ),
     );
   }
 }
-

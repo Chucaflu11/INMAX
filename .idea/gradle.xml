@@ -7,9 +7,9 @@
         <compositeConfiguration>
           <compositeBuild compositeDefinitionSource="SCRIPT">
             <builds>
-              <build path="$USER_HOME$/dev/flutter/packages/flutter_tools/gradle" name="gradle">
+              <build path="$PROJECT_DIR$/../../../../src/flutter/packages/flutter_tools/gradle" name="gradle">
                 <projects>
-                  <project path="$USER_HOME$/dev/flutter/packages/flutter_tools/gradle" />
+                  <project path="$PROJECT_DIR$/../../../../src/flutter/packages/flutter_tools/gradle" />
                 </projects>
               </build>
             </builds>
@@ -31,7 +31,7 @@
             <option value="$PROJECT_DIR$/android/app" />
             <option value="$PROJECT_DIR$/android/spotify-app-remote" />
             <option value="$PROJECT_DIR$/plugins/spotify_sdk/android" />
-            <option value="$USER_HOME$/dev/flutter/packages/flutter_tools/gradle" />
+            <option value="$PROJECT_DIR$/../../../../src/flutter/packages/flutter_tools/gradle" />
           </set>
         </option>
       </GradleProjectSettings>

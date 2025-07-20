@@ -6,7 +6,6 @@ import 'music_screen.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
 import 'ads_screen.dart';
-import 'discover_screen.dart';
 import '../widgets/mini_music_player.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -92,16 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.pop(context);
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const AdsScreen()),
-                  );
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.explore, color: Theme.of(context).colorScheme.secondary),
-                title: const Text('Discover'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const DiscoverScreen()),
                   );
                 },
               ),
