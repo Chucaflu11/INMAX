@@ -1,4 +1,3 @@
-// ads_screen.dart
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,10 +25,25 @@ class _AdsScreenState extends State<AdsScreen> {
     'nike': false,
   };
 
+  Map<String, double> adRates = {
+    'monster': 0.02,
+    'vans': 0.015,
+    'converse': 0.017,
+    'redbull': 0.022,
+    'mcdonalds': 0.018,
+    'starbucks': 0.02,
+    'adidas': 0.015,
+    'kfc': 0.016,
+    'cocacola': 0.021,
+    'nike': 0.019,
+  };
+
   String? selectedPostUri;
   List<Map<String, dynamic>> userPosts = [];
   bool isLoading = false;
   String? error;
+  double totalEarnings = 0;
+  Map<String, double> postEarnings = {};
 
   String? get authToken => AuthService.session?.accessJwt;
   String? get userHandle => AuthService.session?.handle;
@@ -61,10 +75,13 @@ class _AdsScreenState extends State<AdsScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<Map<String, dynamic>> fetchedPosts = [];
+        final Map<String, double> tempEarnings = {};
 
         for (var item in data['feed']) {
           final post = item['post'];
           final embed = post['embed'];
+          final uri = post['uri'];
+          final text = post['record']['text'] ?? '';
           String imageUrl = '';
 
           if (embed != null) {
@@ -79,15 +96,26 @@ class _AdsScreenState extends State<AdsScreen> {
             }
           }
 
-          fetchedPosts.add({
-            'uri': post['uri'],
-            'text': post['record']['text'] ?? '',
-            'image': imageUrl,
-          });
+          // Simula cantidad de vistas por publicación
+          final views = 80 + (item['post']['likeCount'] ?? 0);
+          double earnings = 0;
+
+          for (var ad in selectedAds.entries) {
+            if (ad.value) {
+              earnings += views * (adRates[ad.key] ?? 0.015);
+            }
+          }
+
+          fetchedPosts.add({'uri': uri, 'text': text, 'image': imageUrl});
+          tempEarnings[uri] = earnings;
         }
+
+        final total = tempEarnings.values.fold(0.0, (a, b) => a + b);
 
         setState(() {
           userPosts = fetchedPosts;
+          postEarnings = tempEarnings;
+          totalEarnings = total;
           isLoading = false;
         });
       } else {
@@ -126,15 +154,18 @@ class _AdsScreenState extends State<AdsScreen> {
       });
     } else {
       setState(() {
-        selectedAds = {
-          for (var key in selectedAds.keys) key: false
-        };
+        selectedAds = {for (var key in selectedAds.keys) key: false};
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final selectedBrand = selectedAds.entries.firstWhere(
+      (e) => e.value,
+      orElse: () => const MapEntry('', false),
+    );
+
     return Scaffold(
       appBar: AppBar(title: const Text('Gestión de Anuncios')),
       body: Padding(
@@ -144,6 +175,16 @@ class _AdsScreenState extends State<AdsScreen> {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text('Ganancias totales estimadas: \$${totalEarnings.toStringAsFixed(2)} USD',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
+                  const SizedBox(height: 12),
+                  if (selectedBrand.key.isNotEmpty)
+                    Text(
+                      'La marca "${selectedBrand.key}" paga \$${(adRates[selectedBrand.key] ?? 0.015).toStringAsFixed(3)} por visualización',
+                      style: const TextStyle(color: Colors.green),
+                    ),
+                  const SizedBox(height: 12),
                   const Text('Selecciona una publicación para configurar sus anuncios:'),
                   const SizedBox(height: 12),
                   DropdownButton<String>(
@@ -151,8 +192,10 @@ class _AdsScreenState extends State<AdsScreen> {
                     value: selectedPostUri,
                     hint: const Text('Seleccionar publicación'),
                     items: userPosts.map<DropdownMenuItem<String>>((post) {
+                      final uri = post['uri'];
+                      final earnings = postEarnings[uri] ?? 0;
                       return DropdownMenuItem<String>(
-                        value: post['uri'] as String,
+                        value: uri,
                         child: Row(
                           children: [
                             if (post['image'] != '')
@@ -160,7 +203,7 @@ class _AdsScreenState extends State<AdsScreen> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                post['text'].isEmpty ? '[Sin texto]' : post['text'],
+                                '${post['text'].isEmpty ? '[Sin texto]' : post['text']} - \$${earnings.toStringAsFixed(2)}',
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),

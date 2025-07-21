@@ -90,6 +90,9 @@ class _StageScreenState extends State<StageScreen> {
           }
         }
         return false;
+      }).map((p) {
+        p['post']['hasLiked'] = false;
+        return p;
       }).toList();
 
       setState(() {
@@ -122,6 +125,45 @@ class _StageScreenState extends State<StageScreen> {
 
   int getLikes(dynamic post) {
     return post['likeCount'] is int ? post['likeCount'] : 0;
+  }
+
+  bool isLiked(dynamic post) {
+    return post['hasLiked'] == true;
+  }
+
+  Future<void> toggleLike(int index) async {
+    final post = posts[index]['post'];
+    if (!isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Debes iniciar sesión para dar like')),
+      );
+      return;
+    }
+
+    final id = post['uri'] ?? post['cid'] ?? index.toString();
+    final liked = post['hasLiked'] == true;
+
+    setState(() {
+      post['hasLiked'] = !liked;
+      post['likeCount'] = (post['likeCount'] ?? 0) + (liked ? -1 : 1);
+    });
+
+    try {
+      final url = liked
+          ? 'https://bsky.social/xrpc/app.bsky.like.deleteLike'
+          : 'https://bsky.social/xrpc/app.bsky.like.createLike';
+
+      await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({'subject': id}),
+      );
+    } catch (_) {
+      // Manejo opcional de error
+    }
   }
 
   @override
@@ -158,7 +200,6 @@ class _StageScreenState extends State<StageScreen> {
         return Stack(
           fit: StackFit.expand,
           children: [
-            // Imagen principal
             imageUrl.isNotEmpty && imageUrl.startsWith('http')
                 ? Image.network(
                     imageUrl,
@@ -176,37 +217,44 @@ class _StageScreenState extends State<StageScreen> {
                       child: Icon(Icons.image, size: 80, color: Colors.grey),
                     ),
                   ),
-            // Likes en la esquina superior derecha
             Positioned(
               top: 24,
               right: 24,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.35),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.favorite, color: Colors.pinkAccent, size: 22),
-                    const SizedBox(width: 6),
-                    Text(
-                      '$likes',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
+              child: GestureDetector(
+                onTap: () => toggleLike(index),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.35),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isLiked(post)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: Colors.pinkAccent,
+                        size: 22,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Text(
+                        '$likes',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 17,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            // Indicador de página (opcional, abajo)
             Positioned(
               bottom: 24,
               left: 0,
