@@ -6,13 +6,11 @@ class SpotifyPlayer {
   static const String redirectUri = 'com.example.inmax://callback';
   static const String accessTokenKey = 'spotify_access_token'; //placeholder
 
-  // Guarda el token de acceso
   Future<void> _saveAccessToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(accessTokenKey, token);
   }
 
-  // Recupera el token de acceso
   Future<String?> _getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(accessTokenKey);
@@ -29,11 +27,11 @@ class SpotifyPlayer {
           accessToken: accessToken,
         );
         if (connected) {
-          print('🎵 Conectado usando token guardado');
+          print('Conectado usando token guardado');
           return true;
         }
         print(
-          '⚠️ El token guardado no funcionó, se necesita nueva autenticación.',
+          'El token guardado no funcionó, se necesita nueva autenticación.',
         );
       }
 
@@ -56,7 +54,7 @@ class SpotifyPlayer {
 
       if (accessToken.isNotEmpty) {
         await _saveAccessToken(accessToken); // Guarda el nuevo token
-        print('🔐 Usuario autenticado y token guardado.');
+        print('Usuario autenticado y token guardado.');
 
         final connected = await SpotifySdk.connectToSpotifyRemote(
           clientId: clientId,
@@ -65,7 +63,7 @@ class SpotifyPlayer {
         );
 
         if (connected) {
-          print('🎵 Conectado a Spotify');
+          print('Conectado a Spotify');
           return true;
         }
       }

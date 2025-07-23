@@ -120,7 +120,6 @@ class MusicProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Toggle play/pause
   Future<void> togglePlayPause() async {
     if (!_isConnected) return;
 
@@ -138,7 +137,6 @@ class MusicProvider with ChangeNotifier {
     }
   }
 
-  // Siguiente canción
   Future<void> skipNext() async {
     if (!_isConnected || _currentPlaylistTracks.isEmpty) return;
 
@@ -161,8 +159,6 @@ class MusicProvider with ChangeNotifier {
     await _playTrackAtIndex(nextIndex);
   }
 
-
-  // Canción anterior
   Future<void> skipPrevious() async {
     if (!_isConnected || _currentPlaylistTracks.isEmpty) return;
 
@@ -278,7 +274,6 @@ class MusicProvider with ChangeNotifier {
     }
   }
 
-  // lib/providers/music_provider.dart
   Future<String?> getSpotifyAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(SpotifyPlayer.accessTokenKey);
@@ -294,7 +289,7 @@ class MusicProvider with ChangeNotifier {
   void setShuffleMode() async {
     if (!_isConnected) return;
     _isShuffle = !_isShuffle;
-    // No usar el shuffle de Spotify, usar nuestra lógica personalizada
+    // No usar el shuffle de Spotify
     notifyListeners();
   }
 
@@ -304,7 +299,7 @@ class MusicProvider with ChangeNotifier {
     if (!_isConnected) return;
     _isRepeat = !_isRepeat;
     _isRepeatOne = false; // Desactivar repeat one si se activa repeat
-    // No usar el repeat de Spotify, usar nuestra lógica personalizada
+    // No usar el repeat de Spotify
     notifyListeners();
   }
 
